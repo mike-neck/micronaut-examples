@@ -25,3 +25,9 @@ class ClockFactory {
   @Singleton
   fun clock(): Clock = Clock.systemUTC()
 }
+
+@Factory
+class ZoneRepositoryFactory {
+  @Singleton
+  fun timeRepository(idGen: IdGen): ZoneRepository = MapZoneRepository(idGen = idGen)
+}
