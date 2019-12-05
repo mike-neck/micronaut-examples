@@ -34,7 +34,7 @@ class TimeController(private val clock: Clock, private val zoneRepository: ZoneR
   fun getTime(@PathVariable("id") id: Int?): HttpResponse<*> =
       if (id == null) HttpResponse.badRequest(mapOf("message" to "bad id format"))
       else zoneRepository.findById(TimeZoneId(id))
-          ?.let { HttpResponse.ok(Time(it.asOffset())) }
+          ?.let { HttpResponse.ok(Time(it)) }
           ?: HttpResponse.notFound(mapOf("message" to "not found for id: $id"))
 
   companion object {
@@ -44,6 +44,7 @@ class TimeController(private val clock: Clock, private val zoneRepository: ZoneR
 
 data class Time(val timezone: String, val time: String) {
   constructor(clock: Clock) : this(clock.zone.id, OffsetDateTime.now(clock))
+  constructor(zone: ZoneId): this(zone.id, ZonedDateTime.now(zone).toOffsetDateTime())
   constructor(offset: ZoneOffset) : this(offset, OffsetDateTime.now(offset))
   constructor(timezone: String, time: OffsetDateTime) : this(timezone, time.format(formatter))
   constructor(zoneOffset: ZoneOffset, time: OffsetDateTime) : this(zoneOffset.id, time.format(formatter))
