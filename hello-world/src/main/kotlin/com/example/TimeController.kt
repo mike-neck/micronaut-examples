@@ -68,6 +68,17 @@ class ZoneController(private val zoneRepository: ZoneRepository) {
 
   private fun String.asUri(): URI = URI.create(this)
 
+  @Get("/{id}")
+  fun getById(@PathVariable("id") id: Int?): HttpResponse<*> =
+      if (id == null) HttpResponse.notFound(mapOf("message" to "not found"))
+      else {
+        zoneRepository.findById(TimeZoneId(id))
+            .asResultEx(HttpStatus.NOT_FOUND to ("message" to "no time zone found: $id"))
+            .map { zoneId -> mapOf("timezone" to zoneId.id) }
+            .map { map -> HttpResponse.ok(map) }
+            .rescue { reason -> HttpResponse.status<Map<String, String>>(reason.first).body(mapOf(reason.second)) }
+      }
+
   @Post
   @Consumes("application/x-www-form-urlencoded")
   fun createNew(@Body("zone") zone: String): HttpResponse<*> =

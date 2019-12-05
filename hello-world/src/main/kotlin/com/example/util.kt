@@ -26,7 +26,7 @@ sealed class ResultEx<F, S> {
   }
 }
 
-fun <S: Any, F> S?.asResultEx(f: F): ResultEx<F, S> = if (this == null) ResultEx.failure(f) else ResultEx.success(this)
+fun <S: Any, F> S?.asResultEx(failure: F): ResultEx<F, S> = if (this == null) ResultEx.failure(failure) else ResultEx.success(this)
 
 private class Success<F, S>(private val s: S): ResultEx<F, S>() {
 
