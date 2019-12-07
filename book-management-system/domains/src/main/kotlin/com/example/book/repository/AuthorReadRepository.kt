@@ -15,11 +15,11 @@
  */
 package com.example.book.repository
 
-import com.example.book.domains.Person
+import com.example.book.domains.Author
 import com.example.book.ids.AuthorId
 
 interface AuthorReadRepository {
-  fun findById(id: AuthorId): Person?
+  fun findById(id: AuthorId): Author?
 }
 
 

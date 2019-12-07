@@ -21,13 +21,13 @@ import com.example.book.ids.BookId
 
 data class AuthorName(val firstName: AuthorFirstName, val lastName: AuthorLastName)
 
-data class Person(
+data class Author(
     val id: AuthorId,
     val name: AuthorName
 )
 
-data class Writers(val mainWriter: Person, val coWriter: List<Person>) {
-  constructor(mainWriter: Person, vararg coWriter: Person): this(mainWriter, listOf(*coWriter))
+data class Writers(val mainWriter: Author, val coWriter: List<Author>) {
+  constructor(mainWriter: Author, vararg coWriter: Author): this(mainWriter, listOf(*coWriter))
 
   private val asAuthors: Authors get() = Authors(mutableListOf(mainWriter) + coWriter)
 
@@ -41,7 +41,7 @@ data class Manuscript(
 
 data class Work(val book: Manuscript, val authors: Authors)
 
-data class Authors(val authors: List<Person>)
+data class Authors(val authors: List<Author>)
 
 data class PublishedBook(
     val id: BookId,
