@@ -28,4 +28,7 @@ data class AuthorName(val firstName: AuthorFirstName, val lastName: AuthorLastNa
 data class Author(
     val id: AuthorId,
     val name: AuthorName
-)
+) {
+  @TestOnly
+  constructor(id: Long, name: AuthorName): this(AuthorId(id), name)
+}

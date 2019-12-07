@@ -15,13 +15,9 @@
  */
 package com.example.book.repository
 
-import com.example.book.domains.BookChange
 import com.example.book.domains.PublishedBook
-import com.example.book.domains.Work
+import com.example.book.ids.BookId
 
-interface BookWriteRepository: BookFinder {
-
-  fun save(work: Work): PublishedBook?
-
-  fun update(change: BookChange): PublishedBook?
+interface BookFinder {
+  fun findById(id: BookId): PublishedBook?
 }

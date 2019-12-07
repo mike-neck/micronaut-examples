@@ -29,6 +29,10 @@ sealed class ResultEx<FAILURE, SUCCESS> {
 
   companion object {
     fun <F: Any, S: Any> S?.asResult(f: () -> F): ResultEx<F, S> = if (this == null) Failure(f()) else Success(this) 
+
+    fun <F: Any, S: Any> success(s: S): ResultEx<F, S> = Success(s)
+
+    fun <F: Any, S: Any> failure(f: F): ResultEx<F, S> = Failure(f)
   }
 }
 
@@ -65,6 +69,17 @@ enum class Cause {
 typealias Reason = Pair<Cause, String>
 
 data class Change<T>(private val change: T?) {
+  constructor(): this(null)
+
   val hasChange: Boolean get() = change != null
   fun get(): T = change ?: throw NoSuchElementException("has no change")
+
+  companion object {
+    operator fun <T: Any> invoke(current: T, change: T?): Change<T> =
+        when {
+          change == null -> Change()
+          current == change -> Change()
+          else -> Change(change)
+        }
+  }
 }
