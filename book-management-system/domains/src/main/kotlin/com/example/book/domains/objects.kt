@@ -15,10 +15,20 @@
  */
 package com.example.book.domains
 
+import com.example.book.Change
 import com.example.book.attributes.BookName
 import com.example.book.attributes.Price
 import com.example.book.attributes.PublicationDate
 import com.example.book.ids.BookId
+
+data class PublishedBook(
+    val id: BookId,
+    val name: BookName,
+    val publicationDate: PublicationDate,
+    val price: Price,
+    val authors: Authors)
+
+
 
 data class Writers(val mainWriter: Author, val coWriters: List<Author>) {
   constructor(mainWriter: Author, vararg coWriters: Author): this(mainWriter, listOf(*coWriters))
@@ -37,9 +47,12 @@ data class Work(val book: Manuscript, val authors: Authors)
 
 data class Authors(val authors: List<Author>)
 
-data class PublishedBook(
-    val id: BookId,
-    val name: BookName,
-    val publicationDate: PublicationDate,
-    val price: Price,
-    val authors: Authors)
+
+
+data class BookUpdate(val manuscript: Manuscript)
+
+data class BookChange(
+    val name: Change<BookName>,
+    val publicationDate: Change<PublicationDate>,
+    val price: Change<Price>
+)

@@ -63,3 +63,8 @@ enum class Cause {
 }
 
 typealias Reason = Pair<Cause, String>
+
+data class Change<T>(private val change: T?) {
+  val hasChange: Boolean get() = change != null
+  fun get(): T = change ?: throw NoSuchElementException("has no change")
+}
