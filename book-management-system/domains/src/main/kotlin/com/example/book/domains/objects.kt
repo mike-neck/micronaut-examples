@@ -26,10 +26,10 @@ data class Author(
     val name: AuthorName
 )
 
-data class Writers(val mainWriter: Author, val coWriter: List<Author>) {
-  constructor(mainWriter: Author, vararg coWriter: Author): this(mainWriter, listOf(*coWriter))
+data class Writers(val mainWriter: Author, val coWriters: List<Author>) {
+  constructor(mainWriter: Author, vararg coWriters: Author): this(mainWriter, listOf(*coWriters))
 
-  private val asAuthors: Authors get() = Authors(mutableListOf(mainWriter) + coWriter)
+  private val asAuthors: Authors get() = Authors(mutableListOf(mainWriter) + coWriters)
 
   fun write(manuscript: Manuscript): Work = Work(manuscript, this.asAuthors)
 }
