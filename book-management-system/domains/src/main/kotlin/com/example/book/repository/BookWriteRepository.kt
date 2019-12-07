@@ -18,7 +18,7 @@ package com.example.book.repository
 import com.example.book.domains.PublishedBook
 import com.example.book.domains.Work
 
-interface BookWriterRepository {
+interface BookWriteRepository {
 
   fun save(work: Work): PublishedBook?
 }

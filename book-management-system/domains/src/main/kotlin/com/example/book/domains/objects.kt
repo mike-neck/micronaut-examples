@@ -18,8 +18,11 @@ package com.example.book.domains
 import com.example.book.attributes.*
 import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
+import org.jetbrains.annotations.TestOnly
 
-data class AuthorName(val firstName: AuthorFirstName, val lastName: AuthorLastName)
+data class AuthorName(val firstName: AuthorFirstName, val lastName: AuthorLastName) {
+  @TestOnly constructor(firstName: String, lastName: String): this(AuthorFirstName(firstName), AuthorLastName(lastName))
+}
 
 data class Author(
     val id: AuthorId,

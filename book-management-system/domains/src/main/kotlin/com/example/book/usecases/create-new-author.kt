@@ -24,7 +24,7 @@ import com.example.book.domains.AuthorName
 import com.example.book.repository.AuthorWriteRepository
 
 class CreateNewAuthor(private val authorWriteRepository: AuthorWriteRepository) {
-  fun apply(authorName: AuthorName): ResultEx<Reason, Author> =
+  operator fun invoke(authorName: AuthorName): ResultEx<Reason, Author> =
       authorWriteRepository.save(authorName)
           .asResult { Cause.CONFLICT.with("failed to save author(${authorName.firstName.value},${authorName.lastName.value})") }
 }

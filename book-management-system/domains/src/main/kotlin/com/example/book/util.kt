@@ -15,8 +15,8 @@
  */
 package com.example.book
 
-import java.lang.Exception
 import java.lang.RuntimeException
+import kotlin.Exception
 
 class GatewayException(message: String, cause: Exception? = null): RuntimeException(message, cause)
 
@@ -24,6 +24,8 @@ sealed class ResultEx<FAILURE, SUCCESS> {
   abstract fun <NEXT> map(f: (SUCCESS) -> NEXT): ResultEx<FAILURE, NEXT>
   abstract fun <NEXT> flatMap(f: (SUCCESS) -> ResultEx<FAILURE, NEXT>): ResultEx<FAILURE, NEXT>
   abstract fun rescue(f: (FAILURE) -> SUCCESS): SUCCESS
+
+  abstract fun <EX: Exception> getOrThrow(f: (FAILURE) -> EX): SUCCESS
 
   companion object {
     fun <F: Any, S: Any> S?.asResult(f: () -> F): ResultEx<F, S> = if (this == null) Failure(f()) else Success(this) 
@@ -37,6 +39,7 @@ data class Success<FAILURE, SUCCESS>(val value: SUCCESS): ResultEx<FAILURE, SUCC
   override fun <NEXT> flatMap(f: (SUCCESS) -> ResultEx<FAILURE, NEXT>): ResultEx<FAILURE, NEXT> = f(value)
 
   override fun rescue(f: (FAILURE) -> SUCCESS): SUCCESS = value
+  override fun <EX : Exception> getOrThrow(f: (FAILURE) -> EX): SUCCESS = value
 } 
 
 data class Failure<FAILURE, SUCCESS>(val value: FAILURE): ResultEx<FAILURE, SUCCESS>() {
@@ -46,6 +49,8 @@ data class Failure<FAILURE, SUCCESS>(val value: FAILURE): ResultEx<FAILURE, SUCC
   override fun <NEXT> flatMap(f: (SUCCESS) -> ResultEx<FAILURE, NEXT>): ResultEx<FAILURE, NEXT> = Failure(value)
 
   override fun rescue(f: (FAILURE) -> SUCCESS): SUCCESS = f(value)
+
+  override fun <EX : Exception> getOrThrow(f: (FAILURE) -> EX): SUCCESS = throw f(value)
 } 
 
 enum class Cause {

@@ -25,15 +25,15 @@ import com.example.book.repository.AuthorReadRepository
 
 import com.example.book.ResultEx.Companion.asResult
 import com.example.book.domains.Writers
-import com.example.book.repository.BookWriterRepository
+import com.example.book.repository.BookWriteRepository
 
-class WritersWritingNewBook(private val authorReadRepository: AuthorReadRepository, private val bookWriterRepository: BookWriterRepository) {
+class AuthorsWritingNewBook(private val authorReadRepository: AuthorReadRepository, private val bookWriteRepository: BookWriteRepository) {
 
   fun <A: Any, B: Any> A?.onNull(f: () -> B): ResultEx<B, A> = this.asResult(f)
 
-  fun apply(id: AuthorId, manuscript: Manuscript): ResultEx<Reason, PublishedBook> =
+  operator fun invoke(id: AuthorId, manuscript: Manuscript): ResultEx<Reason, PublishedBook> =
       authorReadRepository.findById(id).asResult { Cause.NOT_FOUND.with("not found author(${id.value})") }
           .map { person -> Writers(mainWriter = person) }
           .map { writers -> writers.write(manuscript) }
-          .flatMap { work -> bookWriterRepository.save(work).asResult { Cause.CONFLICT.with("failed to publish book(name:${work.book.name.value})") } }
+          .flatMap { work -> bookWriteRepository.save(work).asResult { Cause.CONFLICT.with("failed to publish book(name:${work.book.name.value})") } }
 }
