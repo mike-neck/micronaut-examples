@@ -28,12 +28,12 @@ import com.example.book.repository.BookWriteRepository
 import io.kotlintest.be
 import io.kotlintest.matchers.instanceOf
 import io.kotlintest.should
-import io.kotlintest.specs.StringSpec
+import io.kotlintest.specs.BehaviorSpec
 import io.mockk.every
 import io.mockk.mockk
 import java.time.Instant
 
-class AuthorsWriteNewBookTest: StringSpec({
+class AuthorsWriteNewBookTest: BehaviorSpec({
 
   val authorId = AuthorId(1000L)
   val bookId = BookId(3000L)
@@ -44,55 +44,59 @@ class AuthorsWriteNewBookTest: StringSpec({
 
   val manuscript = Manuscript(bookName, publicationDate, price)
 
-  "authorReadRepository#find authorId -> author not found -> Failure" {
-    given()
+  val author = Author(authorId, AuthorName("石田", "三成"))
+
+  given("author not found") {
     val authorFinder = mockk<AuthorFinder>()
     every { authorFinder.findById(any()) } returns null
 
     val authorsWritingNewBook = AuthorsWritingNewBook(authorFinder, mockk())
 
-    `when`()
-    val result = authorsWritingNewBook(AuthorId(2000L), manuscript)
+    `when`("invoke use case") {
+      val result = authorsWritingNewBook(AuthorId(2000L), manuscript)
 
-    then()
-    result should instanceOf(Failure::class)
+      then("result should be failure") {
+        result should instanceOf(Failure::class)
+      }
+    }
   }
 
-  "bookWriteRepository#save work -> conflict -> Failure" {
-    given()
+  given("author found") {
     val authorFinder = mockk<AuthorFinder>()
-    every { authorFinder.findById(authorId) } returns Author(authorId, AuthorName("石田", "三成"))
-
-    val bookWriteRepository = mockk<BookWriteRepository>()
-    every { bookWriteRepository.save(any()) } returns null
-
-    val authorsWritingNewBook = AuthorsWritingNewBook(authorFinder, bookWriteRepository)
-
-    `when`()
-    val result = authorsWritingNewBook(authorId, manuscript)
-
-    then()
-    result should instanceOf(Failure::class)
-  }
-
-  "author found -> book can be saved -> Success" {
-    given()
-    val authorFinder = mockk<AuthorFinder>()
-    val author = Author(authorId, AuthorName("石田", "三成"))
     every { authorFinder.findById(authorId) } returns author
 
-    val bookWriteRepository = mockk<BookWriteRepository>()
-    val publishedBook = PublishedBook(bookId, bookName, publicationDate, price, Authors(listOf(author)))
-    every { bookWriteRepository.save(any())
-    } returns publishedBook
+    and("saving book fails") {
+      val bookWriteRepository = mockk<BookWriteRepository>()
+      every { bookWriteRepository.save(any()) } returns null
 
-    val authorsWritingNewBook = AuthorsWritingNewBook(authorFinder, bookWriteRepository)
+      `when`("invoke use case") {
+        val authorsWritingNewBook = AuthorsWritingNewBook(authorFinder, bookWriteRepository)
 
-    `when`()
-    val result = authorsWritingNewBook(authorId, manuscript)
+        val result = authorsWritingNewBook(authorId, manuscript)
 
-    then()
-    result should instanceOf(Success::class)
-    result.getOrThrow { cause -> IllegalStateException("${cause.first}/${cause.second}") } should be(publishedBook)
+        then("result should be failure") {
+          result should instanceOf(Failure::class)
+        }
+      }
+    }
+
+    and("saving book succeeds") {
+      val bookWriteRepository = mockk<BookWriteRepository>()
+      val publishedBook = PublishedBook(bookId, bookName, publicationDate, price, Authors(listOf(author)))
+      every { bookWriteRepository.save(any()) } returns publishedBook
+
+      `when`("invoke use case") {
+        val authorsWritingNewBook = AuthorsWritingNewBook(authorFinder, bookWriteRepository)
+        val result = authorsWritingNewBook(authorId, manuscript)
+
+        then("result is success") {
+          result should instanceOf(Success::class)
+        }
+        then("result content is expected publishedBook") {
+          val success = result as Success<*, PublishedBook>
+          success.value should be(publishedBook)
+        }
+      }
+    }
   }
 })
