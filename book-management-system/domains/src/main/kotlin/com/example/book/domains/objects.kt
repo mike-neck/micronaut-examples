@@ -27,11 +27,11 @@ data class Person(
 )
 
 data class Writers(val mainWriter: Person, val coWriter: List<Person>) {
-  fun write(manuscript: Manuscript): Work {
-    TODO("not implemented")
-  }
-
   constructor(mainWriter: Person, vararg coWriter: Person): this(mainWriter, listOf(*coWriter))
+
+  private val asAuthors: Authors get() = Authors(mutableListOf(mainWriter) + coWriter)
+
+  fun write(manuscript: Manuscript): Work = Work(manuscript, this.asAuthors)
 }
 
 data class Manuscript(
@@ -39,7 +39,7 @@ data class Manuscript(
     val publicationDate: PublicationDate,
     val price: Price)
 
-data class Work(val book: Manuscript, val writers: Writers)
+data class Work(val book: Manuscript, val authors: Authors)
 
 data class Authors(val authors: List<Person>)
 
