@@ -18,7 +18,7 @@ package com.example.book.repository
 import com.example.book.domains.Author
 import com.example.book.domains.AuthorName
 
-interface AuthorWriteRepository: AuthorReadRepository {
+interface AuthorWriteRepository: AuthorFinder {
 
   fun save(authorName: AuthorName): Author?
 }

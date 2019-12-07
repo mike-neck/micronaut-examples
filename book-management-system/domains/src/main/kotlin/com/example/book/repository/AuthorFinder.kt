@@ -18,7 +18,7 @@ package com.example.book.repository
 import com.example.book.domains.Author
 import com.example.book.ids.AuthorId
 
-interface AuthorReadRepository {
+interface AuthorFinder {
   fun findById(id: AuthorId): Author?
 }
 

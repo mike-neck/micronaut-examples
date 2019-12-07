@@ -21,18 +21,18 @@ import com.example.book.ResultEx
 import com.example.book.domains.Manuscript
 import com.example.book.domains.PublishedBook
 import com.example.book.ids.AuthorId
-import com.example.book.repository.AuthorReadRepository
+import com.example.book.repository.AuthorFinder
 
 import com.example.book.ResultEx.Companion.asResult
 import com.example.book.domains.Writers
 import com.example.book.repository.BookWriteRepository
 
-class AuthorsWritingNewBook(private val authorReadRepository: AuthorReadRepository, private val bookWriteRepository: BookWriteRepository) {
+class AuthorsWritingNewBook(private val authorFinder: AuthorFinder, private val bookWriteRepository: BookWriteRepository) {
 
   fun <A: Any, B: Any> A?.onNull(f: () -> B): ResultEx<B, A> = this.asResult(f)
 
   operator fun invoke(id: AuthorId, manuscript: Manuscript): ResultEx<Reason, PublishedBook> =
-      authorReadRepository.findById(id).asResult { Cause.NOT_FOUND.with("not found author(${id.value})") }
+      authorFinder.findById(id).asResult { Cause.NOT_FOUND.with("not found author(${id.value})") }
           .map { person -> Writers(mainWriter = person) }
           .map { writers -> writers.write(manuscript) }
           .flatMap { work -> bookWriteRepository.save(work).asResult { Cause.CONFLICT.with("failed to publish book(name:${work.book.name.value})") } }

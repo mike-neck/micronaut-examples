@@ -23,7 +23,7 @@ import com.example.book.attributes.PublicationDate
 import com.example.book.domains.*
 import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
-import com.example.book.repository.AuthorReadRepository
+import com.example.book.repository.AuthorFinder
 import com.example.book.repository.BookWriteRepository
 import io.kotlintest.be
 import io.kotlintest.matchers.instanceOf
@@ -46,10 +46,10 @@ class AuthorsWriteNewBookTest: StringSpec({
 
   "authorReadRepository#find authorId -> author not found -> Failure" {
     given()
-    val authorReadRepository = mockk<AuthorReadRepository>()
-    every { authorReadRepository.findById(any()) } returns null
+    val authorFinder = mockk<AuthorFinder>()
+    every { authorFinder.findById(any()) } returns null
 
-    val authorsWritingNewBook = AuthorsWritingNewBook(authorReadRepository, mockk())
+    val authorsWritingNewBook = AuthorsWritingNewBook(authorFinder, mockk())
 
     `when`()
     val result = authorsWritingNewBook(AuthorId(2000L), manuscript)
@@ -60,13 +60,13 @@ class AuthorsWriteNewBookTest: StringSpec({
 
   "bookWriteRepository#save work -> conflict -> Failure" {
     given()
-    val authorReadRepository = mockk<AuthorReadRepository>()
-    every { authorReadRepository.findById(authorId) } returns Author(authorId, AuthorName("石田", "三成"))
+    val authorFinder = mockk<AuthorFinder>()
+    every { authorFinder.findById(authorId) } returns Author(authorId, AuthorName("石田", "三成"))
 
     val bookWriteRepository = mockk<BookWriteRepository>()
     every { bookWriteRepository.save(any()) } returns null
 
-    val authorsWritingNewBook = AuthorsWritingNewBook(authorReadRepository, bookWriteRepository)
+    val authorsWritingNewBook = AuthorsWritingNewBook(authorFinder, bookWriteRepository)
 
     `when`()
     val result = authorsWritingNewBook(authorId, manuscript)
@@ -77,16 +77,16 @@ class AuthorsWriteNewBookTest: StringSpec({
 
   "author found -> book can be saved -> Success" {
     given()
-    val authorReadRepository = mockk<AuthorReadRepository>()
+    val authorFinder = mockk<AuthorFinder>()
     val author = Author(authorId, AuthorName("石田", "三成"))
-    every { authorReadRepository.findById(authorId) } returns author
+    every { authorFinder.findById(authorId) } returns author
 
     val bookWriteRepository = mockk<BookWriteRepository>()
     val publishedBook = PublishedBook(bookId, bookName, publicationDate, price, Authors(listOf(author)))
     every { bookWriteRepository.save(any())
     } returns publishedBook
 
-    val authorsWritingNewBook = AuthorsWritingNewBook(authorReadRepository, bookWriteRepository)
+    val authorsWritingNewBook = AuthorsWritingNewBook(authorFinder, bookWriteRepository)
 
     `when`()
     val result = authorsWritingNewBook(authorId, manuscript)
