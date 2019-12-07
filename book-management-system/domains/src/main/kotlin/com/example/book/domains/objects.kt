@@ -15,19 +15,10 @@
  */
 package com.example.book.domains
 
-import com.example.book.attributes.*
-import com.example.book.ids.AuthorId
+import com.example.book.attributes.BookName
+import com.example.book.attributes.Price
+import com.example.book.attributes.PublicationDate
 import com.example.book.ids.BookId
-import org.jetbrains.annotations.TestOnly
-
-data class AuthorName(val firstName: AuthorFirstName, val lastName: AuthorLastName) {
-  @TestOnly constructor(firstName: String, lastName: String): this(AuthorFirstName(firstName), AuthorLastName(lastName))
-}
-
-data class Author(
-    val id: AuthorId,
-    val name: AuthorName
-)
 
 data class Writers(val mainWriter: Author, val coWriters: List<Author>) {
   constructor(mainWriter: Author, vararg coWriters: Author): this(mainWriter, listOf(*coWriters))
