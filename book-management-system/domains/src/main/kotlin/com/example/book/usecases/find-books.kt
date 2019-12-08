@@ -15,20 +15,17 @@
  */
 package com.example.book.usecases
 
-import com.example.book.attributes.BookName
-import com.example.book.attributes.Price
-import com.example.book.attributes.PublicationDate
-import com.example.book.domains.Author
-import com.example.book.domains.AuthorName
+import com.example.book.Cause
+import com.example.book.Reason
+import com.example.book.ResultEx
+import com.example.book.ResultEx.Companion.asResult
+import com.example.book.domains.PublishedBook
 import com.example.book.ids.BookId
-import java.time.Instant
+import com.example.book.repository.BookFinder
 
-object Values: ValueFactory
+class FindBooks(private val bookFinder: BookFinder) {
 
-interface ValueFactory {
-  val bookId get() = BookId(3000L)
-  val bookName get() = BookName("罪と罰")
-  val price get() = Price(3200)
-  val publicationDate get() = PublicationDate(Instant.now())
-  val author get() = Author(1000L, AuthorName("石田", "三成"))
+  operator fun invoke(bookId: BookId): ResultEx<Reason, PublishedBook> =
+      bookFinder.findById(bookId)
+          .asResult { Cause.NOT_FOUND.with("not found(id:${bookId.value})") }
 }
