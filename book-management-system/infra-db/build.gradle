@@ -1,0 +1,61 @@
+plugins {
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.kotlin.kapt"
+    id "org.jetbrains.kotlin.plugin.allopen"
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://jcenter.bintray.com" }
+}
+
+dependencies {
+    implementation project(":domains")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+    implementation "javax.inject:javax.inject:1"
+
+    implementation "org.seasar.doma:doma:2.25.1"
+    kapt "org.seasar.doma:doma:2.25.1"
+
+    testImplementation "com.h2database:h2:1.4.199"
+
+    testImplementation "io.mockk:mockk:1.9.3"
+    testImplementation "io.kotlintest:kotlintest-runner-junit5:3.3.2"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+kapt {
+    arguments {
+        arg("doma.resources.dir", compileKotlin.destinationDir)
+    }
+}
+
+compileKotlin {
+    dependsOn "copyDomaResources"
+    kotlinOptions {
+        jvmTarget = '11'
+        //Will retain parameter names for Java reflection
+        javaParameters = true
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = '11'
+        javaParameters = true
+    }
+}
+
+task copyDomaResources(type: Sync)  {
+    from sourceSets.main.resources.srcDirs
+    into compileKotlin.destinationDir
+    include 'doma.compile.config'
+    include 'META-INF/**/*.sql'
+    include 'META-INF/**/*.script'
+}
+
+
