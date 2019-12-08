@@ -46,7 +46,7 @@ data class Writing(
 
 @Entity(immutable = true)
 @Table(name = "authors")
-data class AuthorTable(
+data class AuthorRecord(
     @Id val id: AuthorId,
     val firstName: AuthorFirstName,
     val lastName: AuthorLastName
