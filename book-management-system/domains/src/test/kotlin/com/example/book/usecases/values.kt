@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.book.repository
+package com.example.book.usecases
 
-import com.example.book.domains.BookChange
-import com.example.book.domains.PublishedBook
-import com.example.book.domains.Work
+import com.example.book.attributes.BookName
+import com.example.book.attributes.Price
+import com.example.book.attributes.PublicationDate
+import com.example.book.domains.Author
+import com.example.book.domains.AuthorName
+import com.example.book.ids.BookId
+import java.time.Instant
 
-interface BookWriteRepository: BookFinder {
-
-  fun save(work: Work): PublishedBook?
-
-  fun update(change: BookChange): PublishedBook?
-
-  fun delete(book: PublishedBook): Unit?
+object Values {
+  val bookId = BookId(3000L)
+  val bookName = BookName("罪と罰")
+  val price = Price(3200)
+  val publicationDate = PublicationDate(Instant.now())
+  val author = Author(1000L, AuthorName("石田", "三成"))
 }
