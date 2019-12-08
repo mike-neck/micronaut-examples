@@ -15,14 +15,33 @@
  */
 package com.example.book.entities
 
-import com.example.book.attributes.BookName
-import com.example.book.attributes.Price
-import com.example.book.attributes.PublicationDate
+import com.example.book.attributes.*
+import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
+import org.seasar.doma.Entity
+import org.seasar.doma.Id
+import org.seasar.doma.Table
 
-data class Book(
-    val id: BookId,
-    val bookName: BookName,
+@Entity(immutable = true)
+@Table(name = "books")
+data class BookTable(
+    @Id val id: BookId,
+    val name: BookName,
     val price: Price,
     val publicationDate: PublicationDate
+)
+
+@Entity(immutable = true)
+@Table(name = "writings")
+data class Writing(
+    @Id val bookId: BookId,
+    @Id val authorId: AuthorId
+)
+
+@Entity(immutable = true)
+@Table(name = "authors")
+data class AuthorTable(
+    @Id val id: AuthorId,
+    val firstName: AuthorFirstName,
+    val lastName: AuthorLastName
 )
