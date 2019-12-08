@@ -23,8 +23,11 @@ dependencies {
 
     testImplementation "com.h2database:h2:1.4.199"
 
+    testImplementation "org.slf4j:slf4j-simple:1.7.29"
+    testImplementation "org.slf4j:jul-to-slf4j:1.7.29"
+
     testImplementation "io.mockk:mockk:1.9.3"
-    testImplementation "io.kotlintest:kotlintest-runner-junit5:3.3.2"
+    testImplementation "org.junit.jupiter:junit-jupiter:5.4.0"
 }
 
 test {

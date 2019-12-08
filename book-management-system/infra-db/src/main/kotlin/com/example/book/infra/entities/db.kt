@@ -18,9 +18,11 @@ package com.example.book.infra.entities
 import com.example.book.attributes.*
 import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
+import org.jetbrains.annotations.TestOnly
 import org.seasar.doma.Entity
 import org.seasar.doma.Id
 import org.seasar.doma.Table
+import java.time.Instant
 
 @Entity(immutable = true)
 @Table(name = "books")
@@ -29,7 +31,11 @@ data class BookTable(
     val name: BookName,
     val price: Price,
     val publicationDate: PublicationDate
-)
+) {
+  @TestOnly
+  constructor(id: Long, name: String, price: Int, date: Instant):
+      this(BookId(id), BookName(name), Price(price), PublicationDate(date))
+}
 
 @Entity(immutable = true)
 @Table(name = "writings")
