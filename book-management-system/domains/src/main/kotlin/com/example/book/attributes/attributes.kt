@@ -18,7 +18,7 @@ package com.example.book.attributes
 import java.time.DateTimeException
 import java.time.Instant
 
-interface StringAttributeFactory<T: Any> {
+interface StringAttributeFactory<T: StringBasedValue> {
   fun from(value: String?): T? = when {
     value == null -> null
     value.isEmpty() -> null
@@ -28,12 +28,22 @@ interface StringAttributeFactory<T: Any> {
   }
   val maxLength: Int
   fun const(value: String): T
+  val attributeName: String
+  fun strict(value: String?): T = from(value)?: throw IllegalArgumentException("invalid value")
+
+  fun toPrimitiveValue(value: T?): String =
+      value?.value ?: throw IllegalArgumentException("invalid $attributeName")
 }
 
-data class BookName(val value: String) {
+interface StringBasedValue {
+  val value: String
+}
+
+data class BookName(override val value: String): StringBasedValue {
   companion object: StringAttributeFactory<BookName> {
     override val maxLength: Int = 120
     override fun const(value: String): BookName = BookName(value)
+    override val attributeName: String = "bookName"
   }
 }
 
@@ -48,17 +58,19 @@ data class Price(val value: Int) {
   }
 }
 
-data class AuthorFirstName(val value: String) {
+data class AuthorFirstName(override val value: String): StringBasedValue {
   companion object: StringAttributeFactory<AuthorFirstName> {
     override val maxLength: Int = 50
     override fun const(value: String): AuthorFirstName = AuthorFirstName(value)
+    override val attributeName: String = "authorFirstName"
   }
 }
 
-data class AuthorLastName(val value: String) {
+data class AuthorLastName(override val value: String): StringBasedValue {
   companion object: StringAttributeFactory<AuthorLastName> {
     override val maxLength: Int = 50
     override fun const(value: String): AuthorLastName = AuthorLastName(value)
+    override val attributeName: String = "authorLastName"
   }
 }
 

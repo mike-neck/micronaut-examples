@@ -19,14 +19,33 @@ interface IdGen {
   fun newLongId(): Long
 }
 
-data class BookId(val value: Long) {
-  companion object {
-    fun IdGen.newBookId(): BookId = BookId(this.newLongId())
+interface Id<T> {
+  val value: T
+}
+
+interface StrictId<T: Id<V>, V> {
+  fun strict(value: V?): T =
+      if (value != null) from(value)
+      else throw IllegalArgumentException("invalid $nameOfId")
+
+  fun from(value: V): T
+  
+  val nameOfId: String
+  fun toPrimitiveValue(value: T?): V =
+      if (value == null) throw IllegalArgumentException("invalid $nameOfId")
+      else value.value
+}
+
+data class BookId(override val value: Long): Id<Long> {
+  companion object : StrictId<BookId, Long> {
+    override fun from(value: Long): BookId = BookId(value)
+    override val nameOfId: String = "bookId"
   }
 }
 
-data class AuthorId(val value: Long) {
-  companion object {
-    fun IdGen.newAuthorId(): AuthorId = AuthorId(this.newLongId())
+data class AuthorId(override val value: Long): Id<Long> {
+  companion object: StrictId<AuthorId, Long> {
+    override fun from(value: Long): AuthorId = AuthorId(value)
+    override val nameOfId: String = "authorId"
   }
 }

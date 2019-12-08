@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import java.util.stream.Collectors
+
 plugins {
     id "org.jetbrains.kotlin.jvm"
     id "org.jetbrains.kotlin.kapt"
@@ -31,11 +34,12 @@ test {
 kapt {
     arguments {
         arg("doma.resources.dir", compileKotlin.destinationDir)
+        arg("doma.domain.converters", 'com.example.book.conv.Converters')
     }
 }
 
 compileKotlin {
-    dependsOn "copyDomaResources"
+    dependsOn "copyDomaResources", "pickDomainConverters"
     kotlinOptions {
         jvmTarget = '11'
         //Will retain parameter names for Java reflection
@@ -58,4 +62,32 @@ task copyDomaResources(type: Sync)  {
     include 'META-INF/**/*.script'
 }
 
+task pickDomainConverters {
+    doLast {
+        def dir = file('src/main/kotlin/com/example/book/conv').toPath()
+        def files = Files.list(dir).collect(Collectors.toList()).findAll { it.getFileName().toString() != 'Converters.kt' }
+        def classes = []
+        files.collect {
+            def annotation = false
+            it.text.eachLine { line ->
+                if (annotation == true) {
+                    def items = line.split(' ')
+                    def klass = items[1].replace(':', '').trim()
+                    classes << klass
+                    annotation = false
+                } else if (line.trim() == '@ExternalDomain') annotation = true
+            }
+        }
+        logger.info "${classes.join(', ')} will be listed."
+        file('src/main/kotlin/com/example/book/conv/Converters.kt').write("""
+package com.example.book.conv
 
+import org.seasar.doma.DomainConverters
+
+@DomainConverters(
+        ${classes.collect { "$it::class" }.join(',\n        ')}
+)
+interface Converters
+""", 'UTF-8')
+    }
+}
