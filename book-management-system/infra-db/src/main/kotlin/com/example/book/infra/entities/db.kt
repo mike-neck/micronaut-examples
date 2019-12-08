@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.book.entities
+package com.example.book.infra.entities
 
 import com.example.book.attributes.*
 import com.example.book.ids.AuthorId

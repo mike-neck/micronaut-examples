@@ -34,7 +34,7 @@ test {
 kapt {
     arguments {
         arg("doma.resources.dir", compileKotlin.destinationDir)
-        arg("doma.domain.converters", 'com.example.book.conv.Converters')
+        arg("doma.domain.converters", 'com.example.book.infra.conv.Converters')
     }
 }
 
@@ -64,7 +64,7 @@ task copyDomaResources(type: Sync)  {
 
 task pickDomainConverters {
     doLast {
-        def dir = file('src/main/kotlin/com/example/book/conv').toPath()
+        def dir = file('src/main/kotlin/com/example/book/infra/conv').toPath()
         def files = Files.list(dir).collect(Collectors.toList()).findAll { it.getFileName().toString() != 'Converters.kt' }
         def classes = []
         files.collect {
@@ -79,8 +79,8 @@ task pickDomainConverters {
             }
         }
         logger.info "${classes.join(', ')} will be listed."
-        file('src/main/kotlin/com/example/book/conv/Converters.kt').write("""
-package com.example.book.conv
+        file('src/main/kotlin/com/example/book/infra/conv/Converters.kt').write("""
+package com.example.book.infra.conv
 
 import org.seasar.doma.DomainConverters
 

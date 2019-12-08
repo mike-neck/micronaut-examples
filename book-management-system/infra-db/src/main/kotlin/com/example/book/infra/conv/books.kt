@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.book.conv
+package com.example.book.infra.conv
 
 import com.example.book.attributes.BookName
 import com.example.book.attributes.Price
