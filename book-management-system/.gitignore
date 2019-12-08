@@ -12,4 +12,5 @@ out/
 .settings
 .classpath
 
-infra-db/src/main/kotlin/com/example/book/conv/Converters.kt
+infra-db/src/main/kotlin/com/example/book/infra/conv/Converters.kt
+.kotlintest/
