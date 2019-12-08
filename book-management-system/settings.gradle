@@ -1,4 +1,3 @@
 rootProject.name="book-management-system"
 
 include 'domains'
-include 'infras'
