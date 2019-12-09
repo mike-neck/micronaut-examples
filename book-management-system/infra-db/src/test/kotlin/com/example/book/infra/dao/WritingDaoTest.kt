@@ -69,4 +69,54 @@ class WritingDaoTest {
       }
     }
   }
+
+  @Nested
+  inner class DeleteTest {
+
+    @Test
+    fun noRecordsThenNoProblems() {
+      Db.runOnNewTransaction { 
+        val writingDao = WritingDaoImpl(Db)
+        val writing = WritingRecord(BookId(1000L), AuthorId(2000L))
+        val result = writingDao.delete(writing)
+        assertAll(
+            { assertEquals(0, result.count) },
+            { assertEquals(writing, result.entity) }
+        )
+      }
+    }
+
+    @Test
+    fun oneRecordsMatchesThenSuccess() {
+      Db.runOnNewTransaction {
+        Db.connection().use { conn ->
+          //language=sql
+          """
+          insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
+          VALUES ( 2000, '三成', '石田' )
+        """.trimIndent().executeUpdate(conn)
+          //language=sql
+          """
+          insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE)
+          VALUES ( 1000, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
+        """.trimIndent().executeUpdate(conn)
+          //language=sql
+          """
+          insert into WRITINGS (BOOK_ID, AUTHOR_ID) VALUES ( 1000, 2000 )
+        """.trimIndent().executeUpdate(conn)
+        }
+      }
+
+      Db.runOnNewTransaction {
+        val writingDao = WritingDaoImpl(Db)
+        val writing = WritingRecord(BookId(1000L), AuthorId(2000L))
+        val result = writingDao.delete(writing)
+
+        assertAll(
+            { assertEquals(1, result.count) },
+            { assertEquals(writing, result.entity) }
+        )
+      }
+    }
+  }
 }

@@ -18,6 +18,7 @@ package com.example.book.infra.dao
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.WritingRecord
 import org.seasar.doma.Dao
+import org.seasar.doma.Delete
 import org.seasar.doma.Insert
 import org.seasar.doma.jdbc.Result
 
@@ -27,4 +28,7 @@ interface WritingDao {
 
   @Insert
   fun createNew(writing: WritingRecord): Result<WritingRecord>
+
+  @Delete
+  fun delete(writing: WritingRecord): Result<WritingRecord>
 }
