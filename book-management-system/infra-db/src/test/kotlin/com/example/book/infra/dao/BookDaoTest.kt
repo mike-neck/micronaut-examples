@@ -15,10 +15,19 @@
  */
 package com.example.book.infra.dao
 
+import com.example.book.attributes.BookName
+import com.example.book.attributes.Price
+import com.example.book.attributes.PublicationDate
+import com.example.book.domains.Author
+import com.example.book.domains.AuthorName
+import com.example.book.domains.Authors
+import com.example.book.domains.PublishedBook
 import com.example.book.ids.BookId
 import com.example.book.infra.*
 import com.example.book.infra.entities.BookAggregate
 import com.example.book.infra.entities.BookRecord
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -346,6 +355,61 @@ class BookDaoTest {
           ( 1100, 2200 )
         """.trimIndent().executeUpdate(connection)
       }
+    }
+  }
+}
+
+class BookDaoExtensionTest {
+
+  @Nested
+  inner class FindPublishedBookByIdTest {
+
+    @Test
+    fun empty() {
+      val bookDao = mockk<BookDao>()
+      every { bookDao.findBookAggregateById(any()) } returns emptyList()
+
+      val result = bookDao.findPublishedBookById(BookId(1000L))
+
+      assertTrue(result == null)
+    }
+
+    @Test
+    fun single() {
+      val bookDao = mockk<BookDao>()
+      every { bookDao.findBookAggregateById(any()) } returns 
+        listOf(BookAggregate(1000L, "罪と罰", 3200, instant(2019,12,11,12,34,56,789_000_000),2000L,"三成","石田"))
+
+      val result = bookDao.findPublishedBookById(BookId(1000L))
+
+      assertEquals(
+          PublishedBook(BookId(1000L), BookName("罪と罰"), PublicationDate(instant(2019,12,11,12,34,56,789_000_000)), Price(3200),
+              Authors(Author(2000, AuthorName("三成","石田")))),
+          result
+      )
+    }
+
+    @Test
+    fun multiple() {
+      val bookDao = mockk<BookDao>()
+      every { bookDao.findBookAggregateById(any()) } returns
+          listOf(
+              BookAggregate(1000L, "罪と罰", 3200, instant(2019,12,11,12,34,56,789_000_000),2000L,"三成","石田"),
+              BookAggregate(1000L, "罪と罰", 3200, instant(2019,12,11,12,34,56,789_000_000),2100L,"元春","吉川"),
+              BookAggregate(1000L, "罪と罰", 3200, instant(2019,12,11,12,34,56,789_000_000),2200L,"恵瓊","安国寺")
+          )
+
+      val result = bookDao.findPublishedBookById(BookId(1000L))
+
+      assertEquals(
+          PublishedBook(BookId(1000L), BookName("罪と罰"), PublicationDate(instant(2019,12,11,12,34,56,789_000_000)), Price(3200),
+              Authors(
+                  Author(2000, AuthorName("三成","石田")),
+                  Author(2100, AuthorName("元春","吉川")),
+                  Author(2200, AuthorName("恵瓊","安国寺"))
+                  )),
+          result
+      )
     }
   }
 }
