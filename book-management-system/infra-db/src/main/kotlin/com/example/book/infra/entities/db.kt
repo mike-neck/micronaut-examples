@@ -39,7 +39,7 @@ data class BookRecord(
 
 @Entity(immutable = true)
 @Table(name = "writings")
-data class Writing(
+data class WritingRecord(
     @Id val bookId: BookId,
     @Id val authorId: AuthorId
 )
