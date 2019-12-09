@@ -15,6 +15,10 @@
  */
 package com.example.book.infra.dao
 
+import com.example.book.Cause
+import com.example.book.Reason
+import com.example.book.ResultEx
+import com.example.book.ResultEx.Companion.asResult
 import com.example.book.ids.BookId
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.BookRecord
@@ -48,4 +52,11 @@ interface BookDao {
 
   @Delete
   fun delete(book: BookRecord): Result<BookRecord>
+
+  fun deleteById(bookId: BookId): ResultEx<Reason, BookRecord> =
+      findById(bookId).asResult { Cause.NOT_FOUND.with("not found(${bookId.value})") }
+          .map { bookRecord -> delete(bookRecord) }
+          .flatMap { result ->
+            if (result.count == 0) ResultEx.failure<Reason, BookRecord>(Cause.CONFLICT.with("invalid state"))
+            else ResultEx.success(result.entity) }
 }
