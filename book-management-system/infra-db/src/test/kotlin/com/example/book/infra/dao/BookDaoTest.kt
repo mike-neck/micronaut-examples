@@ -22,7 +22,9 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.seasar.doma.jdbc.UniqueConstraintException
 
 @ExtendWith(DbExtension::class)
 class BookDaoTest {
@@ -60,7 +62,7 @@ class BookDaoTest {
 
     @Test
     fun noDataMatchesIdThenNull() {
-      Db.runOnNewTransaction { 
+      Db.runOnNewTransaction {
         val bookDao = BookDaoImpl(Db)
         val book = bookDao.findById(BookId(1000L))
         assertTrue(book == null)
@@ -69,7 +71,7 @@ class BookDaoTest {
 
     @Test
     fun oneRecordsMatchesIdThenNonNull() {
-      Db.runOnNewTransaction { 
+      Db.runOnNewTransaction {
         //language=sql
         val conn = Db.connection()
         """
@@ -88,8 +90,50 @@ class BookDaoTest {
         val book = bookDao.findById(BookId(1000L))
         assertAll(
             { assertTrue(book != null) },
-            { assertEquals(BookRecord(1000, "罪と罰", 3200, instant(2019,12,11,12,34,56,789_000_000)), book) }
+            { assertEquals(BookRecord(1000, "罪と罰", 3200, instant(2019, 12, 11, 12, 34, 56, 789_000_000)), book) }
         )
+      }
+    }
+  }
+
+  @Nested
+  inner class CreateNewTest {
+
+    @Test
+    fun noRecordsThenSuccess() {
+      Db.runOnNewTransaction {
+        val bookDao = BookDaoImpl(Db)
+        val book = BookRecord(1000, "罪と罰", 3200, instant(2019, 12, 11, 12, 34, 56, 789_000_000))
+
+        val result = bookDao.createNew(book)
+
+        assertAll(
+            { assertEquals(1, result.count) },
+            { assertEquals(book, result.entity) }
+        )
+      }
+    }
+
+    @Test
+    fun idConflict() {
+      Db.runOnNewTransaction {
+        val conn = Db.connection()
+        //language=sql
+        """
+          insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE)
+          values ( 1000, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
+        """.trimIndent().executeUpdate(conn)
+      }
+
+      assertThrows<UniqueConstraintException> {
+        Db.runOnNewTransaction {
+          val bookDao = BookDaoImpl(Db)
+          val book = BookRecord(1000, "カラマーゾフの兄弟", 4800, instant(2019, 12, 24, 12, 34, 56, 789_000_000))
+
+          val result = bookDao.createNew(book)
+
+          fail { "expected not to reach here/ result.count(${result.count}),result.content(${result.entity})" }
+        }
       }
     }
   }

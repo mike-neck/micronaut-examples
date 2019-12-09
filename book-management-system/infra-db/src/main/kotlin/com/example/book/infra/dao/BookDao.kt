@@ -19,8 +19,10 @@ import com.example.book.ids.BookId
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.BookRecord
 import org.seasar.doma.Dao
+import org.seasar.doma.Insert
 import org.seasar.doma.Select
 import org.seasar.doma.experimental.Sql
+import org.seasar.doma.jdbc.Result
 
 @Dao
 @MicronautDomaConfigInjection
@@ -39,4 +41,7 @@ interface BookDao {
   """)
   @Select
   fun findById(bookId: BookId): BookRecord?
+
+  @Insert
+  fun createNew(book: BookRecord): Result<BookRecord>
 }
