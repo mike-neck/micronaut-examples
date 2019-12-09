@@ -137,4 +137,66 @@ class BookDaoTest {
       }
     }
   }
+
+  @Nested
+  inner class DeleteTest {
+
+    @Test
+    fun noRecordsThenNoProblem() {
+      Db.runOnNewTransaction {
+        val bookDao = BookDaoImpl(Db)
+        val book = BookRecord(1000L, "罪と罰", 3200, instant(2019, 12, 11, 12, 34, 56, 789_000_000))
+        val result = bookDao.delete(book)
+        assertAll(
+            { assertEquals(0, result.count) },
+            { assertEquals(book, result.entity) }
+        )
+      }
+    }
+
+    @Test
+    fun oneRecordMatchesThenSuccess() {
+      Db.runOnNewTransaction { 
+        val connection = Db.connection()
+        //language=sql
+        """
+          insert into BOOKS(id, name, price, publication_date)
+          values ( 1000, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
+        """.trimIndent().executeUpdate(connection)
+      }
+
+      Db.runOnNewTransaction {
+        val bookDao = BookDaoImpl(Db)
+        val book = BookRecord(1000L, "罪と罰", 3200, instant(2019, 12, 11, 12, 34, 56, 789_000_000))
+        val result = bookDao.delete(book)
+        assertAll(
+            { assertEquals(1, result.count) },
+            { assertEquals(book, result.entity) }
+        )
+      }
+    }
+
+    @Test
+    fun afterUpdatedThenNoProblems() {
+      // 楽観的ロックをかけたほうがいいかもしれんが、後回し
+      Db.runOnNewTransaction {
+        val connection = Db.connection()
+        //language=sql
+        """
+          insert into BOOKS(id, name, price, publication_date)
+          values ( 1000, 'カラマーゾフの兄弟', 4800, '2019-12-11 12:34:56.789' )
+        """.trimIndent().executeUpdate(connection)
+      }
+
+      Db.runOnNewTransaction {
+        val bookDao = BookDaoImpl(Db)
+        val book = BookRecord(1000L, "罪と罰", 3200, instant(2019, 12, 11, 12, 34, 56, 789_000_000))
+        val result = bookDao.delete(book)
+        assertAll(
+            { assertEquals(1, result.count) },
+            { assertEquals(book, result.entity) }
+        )
+      }
+    }
+  }
 }
