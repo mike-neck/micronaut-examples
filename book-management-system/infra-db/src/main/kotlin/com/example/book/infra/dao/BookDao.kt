@@ -22,10 +22,7 @@ import com.example.book.ResultEx.Companion.asResult
 import com.example.book.ids.BookId
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.BookRecord
-import org.seasar.doma.Dao
-import org.seasar.doma.Delete
-import org.seasar.doma.Insert
-import org.seasar.doma.Select
+import org.seasar.doma.*
 import org.seasar.doma.experimental.Sql
 import org.seasar.doma.jdbc.Result
 
@@ -49,6 +46,9 @@ interface BookDao {
 
   @Insert
   fun createNew(book: BookRecord): Result<BookRecord>
+
+  @Update
+  fun update(book: BookRecord): Result<BookRecord>
 
   @Delete
   fun delete(book: BookRecord): Result<BookRecord>

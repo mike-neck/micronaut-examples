@@ -204,4 +204,46 @@ class BookDaoTest {
       }
     }
   }
+
+  @Nested
+  inner class UpdateTest {
+
+    @Test
+    fun noRecordsThenFailure() {
+      Db.runOnNewTransaction {
+        val bookDao = BookDaoImpl(Db)
+        val book = BookRecord(1000L, "罪と罰", 3200, instant(2019, 12, 11, 12, 34, 56, 789_000_000))
+        val result = bookDao.update(book)
+
+        assertAll(
+            { assertEquals(0, result.count) },
+            { assertEquals(book, result.entity) }
+        )
+      }
+    }
+
+    @Test
+    fun oneRecordMatchesThenSuccess() {
+      Db.runOnNewTransaction { 
+        Db.connection().use { connection -> 
+          //language=sql
+          """
+            insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE)
+            VALUES ( 1000, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
+          """.trimIndent().executeUpdate(connection)
+        }
+      }
+
+      Db.runOnNewTransaction {
+        val bookDao = BookDaoImpl(Db)
+        val book = BookRecord(1000L, "罪と罰", 4800, instant(2019, 12, 11, 12, 34, 56, 789_000_000))
+        val result = bookDao.update(book)
+
+        assertAll(
+            { assertEquals(1, result.count) },
+            { assertEquals(book, result.entity) }
+        )
+      }
+    }
+  }
 }
