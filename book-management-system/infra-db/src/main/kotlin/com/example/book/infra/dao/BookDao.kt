@@ -52,11 +52,12 @@ interface BookDao {
 
   @Delete
   fun delete(book: BookRecord): Result<BookRecord>
-
-  fun deleteById(bookId: BookId): ResultEx<Reason, BookRecord> =
-      findById(bookId).asResult { Cause.NOT_FOUND.with("not found(${bookId.value})") }
-          .map { bookRecord -> delete(bookRecord) }
-          .flatMap { result ->
-            if (result.count == 0) ResultEx.failure<Reason, BookRecord>(Cause.CONFLICT.with("invalid state"))
-            else ResultEx.success(result.entity) }
 }
+
+fun BookDao.deleteById(bookId: BookId): ResultEx<Reason, BookRecord> =
+    findById(bookId).asResult { Cause.NOT_FOUND.with("not found(${bookId.value})") }
+        .map { bookRecord -> delete(bookRecord) }
+        .flatMap { result ->
+          if (result.count == 0) ResultEx.failure<Reason, BookRecord>(Cause.CONFLICT.with("invalid state"))
+          else ResultEx.success(result.entity) }
+
