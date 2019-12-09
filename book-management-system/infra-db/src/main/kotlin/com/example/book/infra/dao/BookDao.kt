@@ -19,8 +19,13 @@ import com.example.book.Cause
 import com.example.book.Reason
 import com.example.book.ResultEx
 import com.example.book.ResultEx.Companion.asResult
+import com.example.book.domains.Author
+import com.example.book.domains.AuthorName
+import com.example.book.domains.Authors
+import com.example.book.domains.PublishedBook
 import com.example.book.ids.BookId
 import com.example.book.infra.MicronautDomaConfigInjection
+import com.example.book.infra.entities.BookAggregate
 import com.example.book.infra.entities.BookRecord
 import org.seasar.doma.*
 import org.seasar.doma.experimental.Sql
@@ -44,6 +49,25 @@ interface BookDao {
   @Select
   fun findById(bookId: BookId): BookRecord?
 
+  //language=sql
+  @Sql("""
+    select 
+        b.ID as book_id,
+        b.NAME as name,
+        b.PRICE as price,
+        b.PUBLICATION_DATE as publication_date,
+        a.ID as author_id,
+        a.FIRST_NAME as first_name,
+        a.LAST_NAME as last_name
+    from BOOKS as b
+        join WRITINGS w on b.ID = w.BOOK_ID
+        join AUTHORS a on w.AUTHOR_ID = a.ID
+    where
+        b.ID = /* bookId */1000
+  """)
+  @Select
+  fun findBookAggregateById(bookId: BookId): List<BookAggregate>
+
   @Insert
   fun createNew(book: BookRecord): Result<BookRecord>
 
@@ -61,3 +85,12 @@ fun BookDao.deleteById(bookId: BookId): ResultEx<Reason, BookRecord> =
           if (result.count == 0) ResultEx.failure<Reason, BookRecord>(Cause.CONFLICT.with("invalid state"))
           else ResultEx.success(result.entity) }
 
+fun BookDao.findPublishedBookById(bookId: BookId): PublishedBook? {
+  val list = this.findBookAggregateById(bookId)
+  if (list.isEmpty()) {
+    return null
+  }
+  val book = list[0]
+  val authors = list.map { Author(it.authorId, AuthorName(it.firstName, it.lastName)) }
+  return PublishedBook(book.bookId, book.name, book.publicationDate, book.price, Authors(authors))
+}

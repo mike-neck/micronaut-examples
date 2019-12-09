@@ -17,6 +17,7 @@ package com.example.book.infra.dao
 
 import com.example.book.ids.BookId
 import com.example.book.infra.*
+import com.example.book.infra.entities.BookAggregate
 import com.example.book.infra.entities.BookRecord
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
@@ -159,7 +160,7 @@ class BookDaoTest {
 
     @Test
     fun oneRecordMatchesThenSuccess() {
-      Db.runOnNewTransaction { 
+      Db.runOnNewTransaction {
         Db.connection().use { connection ->
           //language=sql
           """
@@ -224,8 +225,8 @@ class BookDaoTest {
 
     @Test
     fun oneRecordMatchesThenSuccess() {
-      Db.runOnNewTransaction { 
-        Db.connection().use { connection -> 
+      Db.runOnNewTransaction {
+        Db.connection().use { connection ->
           //language=sql
           """
             insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE)
@@ -243,6 +244,107 @@ class BookDaoTest {
             { assertEquals(1, result.count) },
             { assertEquals(book, result.entity) }
         )
+      }
+    }
+  }
+
+  @Nested
+  inner class FindAggregateTest {
+
+    @Test
+    fun noRecordsThenEmpty() {
+      Db.runOnNewTransaction {
+        prepareAuthors()
+      }
+
+      Db.runOnNewTransaction {
+        val bookDao = BookDaoImpl(Db)
+        val result = bookDao.findBookAggregateById(BookId(1000L))
+        assertTrue(result.isEmpty())
+      }
+    }
+
+    @Test
+    fun singleAuthor() {
+      Db.runOnNewTransaction {
+        prepareAuthors()
+        prepareBooks()
+      }
+
+      Db.runOnNewTransaction {
+        val bookDao = BookDaoImpl(Db)
+        val result = bookDao.findBookAggregateById(BookId(1000L))
+        assertAll(
+            { assertEquals(1, result.size) },
+            {
+              assertEquals(listOf(
+                  BookAggregate(
+                      1000L, "罪と罰", 3200, instant(2019, 12, 11, 12, 34, 56, 789_000_000),
+                      2000L, "三成", "石田")
+              ), result)
+            }
+        )
+      }
+    }
+
+    @Test
+    fun multipleAuthor() {
+      Db.runOnNewTransaction {
+        prepareAuthors()
+        prepareBooks()
+      }
+
+      Db.runOnNewTransaction {
+        val bookDao = BookDaoImpl(Db)
+        val result = bookDao.findBookAggregateById(BookId(1100L))
+        assertEquals(3, result.size)
+      }
+    }
+
+    private fun prepareAuthors() {
+      Db.connection().use { connection ->
+        //language=sql
+        """
+              insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
+              VALUES ( 2000, '三成', '石田' )
+            """.trimIndent().executeUpdate(connection)
+        //language=sql
+        """
+              insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
+              VALUES ( 2100, '元春', '吉川' )
+            """.trimIndent().executeUpdate(connection)
+        //language=sql
+        """
+          insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
+          VALUES ( 2200, '恵瓊', '安国寺' )
+        """.trimIndent().executeUpdate(connection)
+      }
+    }
+
+    private fun prepareBooks() {
+      Db.connection().use { connection ->
+        //language=sql
+        """
+          insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE)
+          VALUES ( 1000, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
+        """.trimIndent().executeUpdate(connection)
+        //language=sql
+        """
+          insert into WRITINGS (BOOK_ID, AUTHOR_ID) VALUES ( 1000, 2000 )
+        """.trimIndent().executeUpdate(connection)
+
+        //language=sql
+        """
+          insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE) 
+          VALUES ( 1100, '実践 Kotlin', 2800, '2010-10-10 10:20:30.400' )
+        """.trimIndent().executeUpdate(connection)
+        //language=sql
+        """
+          insert into WRITINGS (BOOK_ID, AUTHOR_ID) VALUES
+          ( 1100, 2000 ),
+          ( 1100, 2100 ),
+          ( 1100, 2200 )
+        """.trimIndent().executeUpdate(connection)
       }
     }
   }

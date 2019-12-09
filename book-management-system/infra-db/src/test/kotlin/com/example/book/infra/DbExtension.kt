@@ -74,7 +74,7 @@ class DbExtension : BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
   override fun afterEach(context: ExtensionContext?) {
     logger.info("dropping database")
     resourceReader("shutdown.sql").use { reader -> 
-      Db.transactionManager.requiresNew { 
+      Db.transactionManager.required { 
         RunScript.execute(Db.dataSource.connection, reader)
       }
     }
@@ -93,7 +93,7 @@ object Db : Config {
 
   fun connection(): Connection = ds.connection
 
-  fun runOnNewTransaction(runnable: () -> Unit) = transactionManager.requiresNew(runnable)
+  fun runOnNewTransaction(runnable: () -> Unit) = transactionManager.required(runnable)
 
   override fun getDataSource(): DataSource = ds
   override fun getTransactionManager(): TransactionManager = tm
