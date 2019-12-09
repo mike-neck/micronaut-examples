@@ -93,6 +93,8 @@ object Db : Config {
 
   fun connection(): Connection = ds.connection
 
+  fun runOnNewTransaction(runnable: () -> Unit) = transactionManager.requiresNew(runnable)
+
   override fun getDataSource(): DataSource = ds
   override fun getTransactionManager(): TransactionManager = tm
 
