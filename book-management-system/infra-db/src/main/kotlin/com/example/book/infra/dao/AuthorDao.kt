@@ -15,15 +15,26 @@
  */
 package com.example.book.infra.dao
 
+import com.example.book.ids.AuthorId
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.AuthorRecord
 import org.seasar.doma.Dao
 import org.seasar.doma.Insert
+import org.seasar.doma.Select
+import org.seasar.doma.experimental.Sql
 import org.seasar.doma.jdbc.Result
 
 @Dao
 @MicronautDomaConfigInjection
 interface AuthorDao {
+
+  //language=sql
+  @Sql("""
+    select * from AUTHORS
+    where ID = /* authorId */2000;
+  """)
+  @Select
+  fun findById(authorId: AuthorId): AuthorRecord?
 
   @Insert
   fun save(author: AuthorRecord): Result<AuthorRecord>
