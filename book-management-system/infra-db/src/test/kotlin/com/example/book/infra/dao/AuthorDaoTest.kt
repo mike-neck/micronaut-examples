@@ -49,10 +49,11 @@ class AuthorDaoTest {
   @Test
   fun cannotSaveDuplicateId() {
     Db.transactionManager.requiresNew {
-      val connection = Db.connection()
-      //language=sql
-      "insert into AUTHORS (ID, FIRST_NAME, LAST_NAME) values (1000, '元春', '吉川');"
-          .executeUpdate(connection)
+      Db.connection().use { connection ->
+        //language=sql
+        "insert into AUTHORS (ID, FIRST_NAME, LAST_NAME) values (1000, '元春', '吉川');"
+            .executeUpdate(connection)
+      }
     }
 
     assertThrows<UniqueConstraintException> {

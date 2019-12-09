@@ -43,11 +43,12 @@ class BookDaoTest {
   @Test
   fun oneDataThenListHasOne() {
     Db.transactionManager.requiresNew {
-      val connection = Db.connection()
-      //language=sql
-      """insert into BOOKS(id, name, price, publication_date)
+      Db.connection().use { connection ->
+        //language=sql
+        """insert into BOOKS(id, name, price, publication_date)
         values ( 100, '罪と罰', 3200, '2019-12-11 13:00:00.123' )
         """.executeUpdate(connection)
+      }
     }
 
     Db.transactionManager.requiresNew {
@@ -72,17 +73,18 @@ class BookDaoTest {
     @Test
     fun oneRecordsMatchesIdThenNonNull() {
       Db.runOnNewTransaction {
-        //language=sql
-        val conn = Db.connection()
-        """
+        Db.connection().use { conn ->
+          //language=sql
+          """
           insert into BOOKS(id, name, price, publication_date)
           values ( 1000, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
         """.executeUpdate(conn)
-        //language=sql
-        """
+          //language=sql
+          """
           insert into BOOKS(id, name, price, publication_date)
           values ( 2000, 'カラマーゾフの兄弟', 4800, '2019-12-24 12:34:56.789' )
         """.trimIndent().executeUpdate(conn)
+        }
       }
 
       Db.runOnNewTransaction {
@@ -117,12 +119,13 @@ class BookDaoTest {
     @Test
     fun idConflict() {
       Db.runOnNewTransaction {
-        val conn = Db.connection()
-        //language=sql
-        """
+        Db.connection().use { conn ->
+          //language=sql
+          """
           insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE)
           values ( 1000, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
         """.trimIndent().executeUpdate(conn)
+        }
       }
 
       assertThrows<UniqueConstraintException> {
@@ -157,12 +160,13 @@ class BookDaoTest {
     @Test
     fun oneRecordMatchesThenSuccess() {
       Db.runOnNewTransaction { 
-        val connection = Db.connection()
-        //language=sql
-        """
+        Db.connection().use { connection ->
+          //language=sql
+          """
           insert into BOOKS(id, name, price, publication_date)
           values ( 1000, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
         """.trimIndent().executeUpdate(connection)
+        }
       }
 
       Db.runOnNewTransaction {
@@ -180,12 +184,13 @@ class BookDaoTest {
     fun afterUpdatedThenNoProblems() {
       // 楽観的ロックをかけたほうがいいかもしれんが、後回し
       Db.runOnNewTransaction {
-        val connection = Db.connection()
-        //language=sql
-        """
+        Db.connection().use { connection ->
+          //language=sql
+          """
           insert into BOOKS(id, name, price, publication_date)
           values ( 1000, 'カラマーゾフの兄弟', 4800, '2019-12-11 12:34:56.789' )
         """.trimIndent().executeUpdate(connection)
+        }
       }
 
       Db.runOnNewTransaction {

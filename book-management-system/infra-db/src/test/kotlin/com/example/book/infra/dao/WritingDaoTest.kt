@@ -45,17 +45,18 @@ class WritingDaoTest {
     @Test
     fun withBooksAndAuthorThenSuccess() {
       Db.runOnNewTransaction { 
-        val connection = Db.connection()
-        //language=sql
-        """
+        Db.connection().use { connection ->
+          //language=sql
+          """
           insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE)
           VALUES ( 1000, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
         """.trimIndent().executeUpdate(connection)
-        //language=sql
-        """
+          //language=sql
+          """
           insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
           VALUES ( 2000, '三成', '石田' )
         """.trimIndent().executeUpdate(connection)
+        }
       }
 
       Db.runOnNewTransaction {
