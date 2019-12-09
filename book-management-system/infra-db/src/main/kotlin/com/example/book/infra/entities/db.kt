@@ -26,7 +26,7 @@ import java.time.Instant
 
 @Entity(immutable = true)
 @Table(name = "books")
-data class BookTable(
+data class BookRecord(
     @Id val id: BookId,
     val name: BookName,
     val price: Price,

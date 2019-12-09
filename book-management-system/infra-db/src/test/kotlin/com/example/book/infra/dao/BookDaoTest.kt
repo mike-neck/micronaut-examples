@@ -17,7 +17,7 @@ package com.example.book.infra.dao
 
 import com.example.book.ids.BookId
 import com.example.book.infra.*
-import com.example.book.infra.entities.BookTable
+import com.example.book.infra.entities.BookRecord
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -51,7 +51,7 @@ class BookDaoTest {
     Db.transactionManager.requiresNew {
       val bookDao = BookDaoImpl(Db)
       val books = bookDao.findAll()
-      assertEquals(listOf(BookTable(100, "罪と罰", 3200, instant(2019, 12, 11, 13, 0, 0, 123_000_000))), books)
+      assertEquals(listOf(BookRecord(100, "罪と罰", 3200, instant(2019, 12, 11, 13, 0, 0, 123_000_000))), books)
     }
   }
 
@@ -88,7 +88,7 @@ class BookDaoTest {
         val book = bookDao.findById(BookId(1000L))
         assertAll(
             { assertTrue(book != null) },
-            { assertEquals(BookTable(1000, "罪と罰", 3200, instant(2019,12,11,12,34,56,789_000_000)), book) }
+            { assertEquals(BookRecord(1000, "罪と罰", 3200, instant(2019,12,11,12,34,56,789_000_000)), book) }
         )
       }
     }

@@ -17,7 +17,7 @@ package com.example.book.infra.dao
 
 import com.example.book.ids.BookId
 import com.example.book.infra.MicronautDomaConfigInjection
-import com.example.book.infra.entities.BookTable
+import com.example.book.infra.entities.BookRecord
 import org.seasar.doma.Dao
 import org.seasar.doma.Select
 import org.seasar.doma.experimental.Sql
@@ -30,7 +30,7 @@ interface BookDao {
     select * from books;
   """)
   @Select
-  fun findAll(): List<BookTable>
+  fun findAll(): List<BookRecord>
 
   @Sql(// language=sql
       """
@@ -38,5 +38,5 @@ interface BookDao {
         where ID = /* bookId */10;
   """)
   @Select
-  fun findById(bookId: BookId): BookTable?
+  fun findById(bookId: BookId): BookRecord?
 }
