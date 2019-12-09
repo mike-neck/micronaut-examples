@@ -17,17 +17,22 @@ package com.example.book.infra.dao
 
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.WritingRecord
-import org.seasar.doma.Dao
-import org.seasar.doma.Delete
-import org.seasar.doma.Insert
+import org.seasar.doma.*
+import org.seasar.doma.jdbc.BatchResult
 import org.seasar.doma.jdbc.Result
 
 @Dao
 @MicronautDomaConfigInjection
 interface WritingDao {
 
+  @BatchInsert
+  fun createNew(writings: List<WritingRecord>): BatchResult<WritingRecord>
+
   @Insert
   fun createNew(writing: WritingRecord): Result<WritingRecord>
+
+  @BatchDelete
+  fun delete(writings: List<WritingRecord>): BatchResult<WritingRecord>
 
   @Delete
   fun delete(writing: WritingRecord): Result<WritingRecord>

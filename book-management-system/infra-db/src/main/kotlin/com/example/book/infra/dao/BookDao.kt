@@ -16,13 +16,11 @@
 package com.example.book.infra.dao
 
 import com.example.book.Cause
+import com.example.book.Change
 import com.example.book.Reason
 import com.example.book.ResultEx
 import com.example.book.ResultEx.Companion.asResult
-import com.example.book.domains.Author
-import com.example.book.domains.AuthorName
-import com.example.book.domains.Authors
-import com.example.book.domains.PublishedBook
+import com.example.book.domains.*
 import com.example.book.ids.BookId
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.BookAggregate
@@ -93,4 +91,17 @@ fun BookDao.findPublishedBookById(bookId: BookId): PublishedBook? {
   val book = list[0]
   val authors = list.map { Author(it.authorId, AuthorName(it.firstName, it.lastName)) }
   return PublishedBook(book.bookId, book.name, book.publicationDate, book.price, Authors(authors))
+}
+
+fun BookDao.update(bookChange: BookChange): PublishedBook? {
+  if (!bookChange.needUpdate) {
+    return null
+  }
+  val bookRecord = this.findById(bookChange.id) ?: return null
+  val newBookRecord = bookRecord.applyChange(bookChange)
+  val result = this.update(newBookRecord)
+  if (result.count != 1) {
+    return null
+  }
+  return this.findPublishedBookById(newBookRecord.id)
 }

@@ -40,6 +40,7 @@ data class BookId(override val value: Long): Id<Long> {
   companion object : StrictId<BookId, Long> {
     override fun from(value: Long): BookId = BookId(value)
     override val nameOfId: String = "bookId"
+    fun IdGen.newBookId(): BookId = BookId(this.newLongId())
   }
 }
 
@@ -47,5 +48,6 @@ data class AuthorId(override val value: Long): Id<Long> {
   companion object: StrictId<AuthorId, Long> {
     override fun from(value: Long): AuthorId = AuthorId(value)
     override val nameOfId: String = "authorId"
+    fun IdGen.newAuthorId(): AuthorId = AuthorId(this.newLongId())
   }
 }

@@ -42,3 +42,7 @@ fun <S: Any, R: Any> Result<S>.map(f: (S) -> R): Result<R> =
 fun <A: Any, B: Any> A?.zip(f: () -> B?): Pair<A, B>? =
     if (this == null) null
     else f()?.let { this to it }
+
+fun <A: Any, B: Any> A?.zip(f: (A) -> B?): Pair<A, B>? =
+    if (this == null) null
+    else f(this)?.let { this to it }

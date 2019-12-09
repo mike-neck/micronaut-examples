@@ -15,9 +15,14 @@
  */
 package com.example.book.infra.entities
 
+import com.example.book.Change
 import com.example.book.attributes.*
+import com.example.book.domains.BookChange
+import com.example.book.domains.Work
 import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
+import com.example.book.ids.BookId.Companion.newBookId
+import com.example.book.ids.IdGen
 import org.jetbrains.annotations.TestOnly
 import org.seasar.doma.Entity
 import org.seasar.doma.Id
@@ -35,6 +40,21 @@ data class BookRecord(
   @TestOnly
   constructor(id: Long, name: String, price: Int, date: Instant):
       this(BookId(id), BookName(name), Price(price), PublicationDate(date))
+
+  fun applyChange(bookChange: BookChange): BookRecord =
+      BookRecord(
+          id,
+          name.withChange(bookChange.name) { newName, _ -> newName },
+          price.withChange(bookChange.price) { newPrice, _ -> newPrice },
+          publicationDate.withChange(bookChange.publicationDate) { newDate, _ -> newDate }
+      )
+
+  private fun <T, R> R.withChange(change: Change<T>, f: (T, R) -> R): R = change.withChange(this, f)
+
+  companion object {
+    fun fromWork(idGen: IdGen, work: Work): BookRecord =
+        work.book.let { BookRecord(idGen.newBookId(), it.name, it.price, it.publicationDate) }
+  }
 }
 
 @Entity(immutable = true)
