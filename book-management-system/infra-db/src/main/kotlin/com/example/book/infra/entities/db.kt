@@ -44,12 +44,12 @@ data class BookRecord(
   fun applyChange(bookChange: BookChange): BookRecord =
       BookRecord(
           id,
-          name.withChange(bookChange.name) { newName, _ -> newName },
-          price.withChange(bookChange.price) { newPrice, _ -> newPrice },
-          publicationDate.withChange(bookChange.publicationDate) { newDate, _ -> newDate }
+          name.accept(bookChange.name),
+          price.accept(bookChange.price),
+          publicationDate.accept(bookChange.publicationDate)
       )
 
-  private fun <T, R> R.withChange(change: Change<T>, f: (T, R) -> R): R = change.withChange(this, f)
+  private fun <T> T.accept(change: Change<T>): T = change.apply(this)
 
   companion object {
     fun fromWork(idGen: IdGen, work: Work): BookRecord =

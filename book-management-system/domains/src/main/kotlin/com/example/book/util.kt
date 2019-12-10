@@ -74,9 +74,7 @@ data class Change<T>(private val change: T?) {
   val hasChange: Boolean get() = change != null
   fun get(): T = change ?: throw NoSuchElementException("has no change")
 
-  fun <R> withChange(r: R, f: (T, R) -> R): R =
-      if (change != null) f(change, r)
-      else r
+  fun apply(oldValue: T): T = change ?: oldValue
 
   companion object {
     operator fun <T: Any> invoke(current: T, change: T?): Change<T> =
