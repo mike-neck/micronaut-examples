@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example
+package com.example.author
 
+import com.example.Logger
 import com.example.book.ResultEx
 import com.example.book.attributes.AuthorFirstName
 import com.example.book.attributes.AuthorLastName
