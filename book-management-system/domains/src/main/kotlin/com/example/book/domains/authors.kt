@@ -23,6 +23,10 @@ import org.jetbrains.annotations.TestOnly
 data class AuthorName(val firstName: AuthorFirstName, val lastName: AuthorLastName) {
   @TestOnly
   constructor(firstName: String, lastName: String): this(AuthorFirstName(firstName), AuthorLastName(lastName))
+
+  companion object {
+    fun fromPair(pair: Pair<AuthorFirstName, AuthorLastName>): AuthorName = AuthorName(pair.first, pair.second)
+  }
 }
 
 data class Author(
