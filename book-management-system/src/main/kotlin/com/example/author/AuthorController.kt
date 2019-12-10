@@ -29,7 +29,7 @@ import com.example.book.usecases.FindBooks
 import com.example.http.*
 import com.example.json.AuthorJson
 import com.example.json.BookJson
-import com.example.util.validationError
+import com.example.util.nullToValidationError
 import com.example.util.zipWith
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
@@ -57,7 +57,7 @@ class AuthorController
   @Produces("application/json")
   fun getAuthor(@PathVariable("id") id: String?): HttpResponse<*> =
       AuthorId.fromString(id)
-          .validationError { listOf("invalid number format(id:$id)") }
+          .nullToValidationError { listOf("invalid number format(id:$id)") }
           .validationErrorToHttpError
           .flatMap { authorDao.findById(it).nullToHttpError { HttpStatus.NOT_FOUND to listOf("author not found(id:$id)") } }
           .run(
@@ -72,8 +72,8 @@ class AuthorController
   fun createNewAuthor(
       @Body("firstName") firstName: String?,
       @Body("lastName") lastName: String?): HttpResponse<*> =
-      AuthorFirstName.from(firstName).validationError { listOf("invalid firstName") }
-          .zipWith { AuthorLastName.from(lastName).validationError { listOf("invalid lastName") } }
+      AuthorFirstName.from(firstName).nullToValidationError { listOf("invalid firstName") }
+          .zipWith { AuthorLastName.from(lastName).nullToValidationError { listOf("invalid lastName") } }
           .validationErrorToHttpError
           .flatMap { createNewAuthor.apply(AuthorName.fromPair(it)) }
           .run(
@@ -92,8 +92,8 @@ class AuthorController
   fun getAuthorsBook(
       @PathVariable("id") author: String,
       @PathVariable("bookId") book: String): HttpResponse<*> =
-      AuthorId.fromString(author).validationError { listOf("not found(author:$author,book:$book)") }
-          .zipWith { BookId.fromString(book).validationError { listOf("not found(author:$author,book:$book)") } }
+      AuthorId.fromString(author).nullToValidationError { listOf("not found(author:$author,book:$book)") }
+          .zipWith { BookId.fromString(book).nullToValidationError { listOf("not found(author:$author,book:$book)") } }
           .validationErrorToHttpError
           .mapFailure { pair -> HttpStatus.NOT_FOUND to pair.second }
           .flatMap { findBooks.apply(it) }
@@ -117,7 +117,7 @@ class AuthorController
       @Body("name") name: String?,
       @Body("price") price: String?,
       @Body("publish") publish: String?): HttpResponse<*> =
-      AuthorId.fromString(id).validationError { listOf("invalid author id($id)") }
+      AuthorId.fromString(id).nullToValidationError { listOf("invalid author id($id)") }
           .zipWith { manuscript(name, price, publish) }
           .validationErrorToHttpError
           .flatMap { pair -> writingNewBook.apply(pair) }
@@ -134,9 +134,9 @@ class AuthorController
         name: String?,
         price: String?,
         publish: String?): ResultEx<ValidationError, Manuscript> =
-        BookName.from(name).validationError { listOf("invalid name($name)") }
-            .zipWith { Price.from(price).validationError { listOf("invalid price($price)") } }
-            .zipWith { PublicationDate.from(publish).validationError { listOf("invalid publish date($publish)") } }
+        BookName.from(name).nullToValidationError { listOf("invalid name($name)") }
+            .zipWith { Price.from(price).nullToValidationError { listOf("invalid price($price)") } }
+            .zipWith { PublicationDate.from(publish).nullToValidationError { listOf("invalid publish date($publish)") } }
             .map { pair -> Manuscript(pair.first.first, pair.second, pair.first.second) }
   }
 }

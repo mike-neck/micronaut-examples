@@ -20,7 +20,7 @@ import com.example.book.ResultEx
 import com.example.book.Success
 import com.example.http.ValidationError
 
-fun <T: Any> T?.validationError(err: () -> ValidationError): ResultEx<ValidationError, T> =
+fun <T: Any> T?.nullToValidationError(err: () -> ValidationError): ResultEx<ValidationError, T> =
     if (this == null) ResultEx.failure(err())
     else ResultEx.success(this)
 
