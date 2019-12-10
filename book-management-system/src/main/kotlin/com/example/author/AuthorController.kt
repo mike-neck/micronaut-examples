@@ -17,13 +17,16 @@ package com.example.author
 
 import com.example.Logger
 import com.example.book.ResultEx
-import com.example.book.attributes.AuthorFirstName
-import com.example.book.attributes.AuthorLastName
+import com.example.book.attributes.*
 import com.example.book.domains.Author
 import com.example.book.domains.AuthorName
+import com.example.book.domains.Manuscript
+import com.example.book.domains.PublishedBook
 import com.example.book.ids.AuthorId
+import com.example.book.ids.BookId
 import com.example.book.infra.dao.AuthorDao
 import com.example.book.infra.entities.AuthorRecord
+import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.CreateNewAuthor
 import com.example.http.*
 import com.example.util.validationError
@@ -32,12 +35,14 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.*
 import java.net.URI
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @Controller("/authors")
 class AuthorController
 @Inject constructor(
     private val createNewAuthor: CreateNewAuthor,
+    private val writingNewBook: AuthorsWritingNewBook,
     private val authorDao: AuthorDao
 ) {
 
@@ -76,6 +81,42 @@ class AuthorController
               onFailure = { logger.info("createNewAuthor: failure, firstName: {}, lastName: {}, error: {}", firstName, lastName, it.second) })
           .map { HttpResponse.created<AuthorJson>(URI.create("/authors/${it.id}")).body(it) as HttpResponse<*> }
           .rescue { it.toResponse() }
+
+  private fun AuthorsWritingNewBook.apply(pair: Pair<AuthorId, Manuscript>): ResultEx<HttpError, BookJson> =
+      this(pair.first, pair.second)
+          .map { publishedBook -> BookJson(publishedBook) }
+          .mapFailure { it.toHttpError() }
+
+  @Post("{id}/books")
+  @Consumes("application/json", "application/x-www-form-urlencoded")
+  @Produces("application/json")
+  fun writeBook(
+      @PathVariable("id") id: String?,
+      @Body("name") name: String?,
+      @Body("price") price: String?,
+      @Body("publish") publish: String?): HttpResponse<*> =
+      AuthorId.fromString(id).validationError { listOf("invalid author id($id)") }
+          .zipWith { manuscript(name, price, publish) }
+          .validationErrorToHttpError
+          .flatMap { pair -> writingNewBook.apply(pair) }
+          .run(
+              onSuccess = { logger.info("writeBook: success, author: {}, book: {}", id, it.id) },
+              onFailure = { logger.info("writeBook: failure, author: {}, status: {}, error: {}", id, it.first, it.second) })
+          .map { bookJson -> HttpResponse
+              .created<BookJson>(URI.create("/authors/$id/books/${bookJson.id}"))
+              .body(bookJson) as HttpResponse<*> }
+          .rescue { it.toResponse() }
+
+  companion object {
+    private fun manuscript(
+        name: String?,
+        price: String?,
+        publish: String?): ResultEx<ValidationError, Manuscript> =
+        BookName.from(name).validationError { listOf("invalid name($name)") }
+            .zipWith { Price.from(price).validationError { listOf("invalid price($price)") } }
+            .zipWith { PublicationDate.from(publish).validationError { listOf("invalid publish date($publish)") } }
+            .map { pair -> Manuscript(pair.first.first, pair.second, pair.first.second) }
+  }
 }
 
 data class AuthorJson(val id: Long, val firstName: String, val lastName: String) {
@@ -84,4 +125,17 @@ data class AuthorJson(val id: Long, val firstName: String, val lastName: String)
   constructor(id: AuthorId, firstName: AuthorFirstName, lastName: AuthorLastName):
       this(id.value, firstName.value, lastName.value)
   constructor(author: AuthorRecord): this(author.id, author.firstName, author.lastName)
+
+  companion object {
+    operator fun invoke(authors: List<Author>): List<AuthorJson> =
+        authors.map { author -> AuthorJson(author) }
+  }
+}
+
+data class BookJson
+(val id: Long, val name: String, val price: Int, val publish: String, val authors: List<AuthorJson>) {
+
+  constructor(book: PublishedBook): this(book.id, book.name, book.price, book.publicationDate, book.authors.authors)
+  constructor(id: BookId, name: BookName, price: Price, date: PublicationDate, authors: List<Author>):
+      this(id.value, name.value, price.value, DateTimeFormatter.ISO_INSTANT.format(date.value), AuthorJson(authors))
 }

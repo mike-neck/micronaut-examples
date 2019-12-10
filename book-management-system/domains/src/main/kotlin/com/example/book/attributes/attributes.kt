@@ -15,6 +15,7 @@
  */
 package com.example.book.attributes
 
+import java.lang.NumberFormatException
 import java.time.DateTimeException
 import java.time.Instant
 
@@ -55,6 +56,9 @@ data class Price(val value: Int) {
           value < 0 -> null
           else -> Price(value)
         }
+
+    fun from(value: String?): Price? =
+        from(try { value?.toInt() } catch (e: NumberFormatException) { null })
   }
 }
 

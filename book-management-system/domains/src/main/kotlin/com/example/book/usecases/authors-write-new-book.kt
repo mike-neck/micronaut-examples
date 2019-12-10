@@ -27,9 +27,12 @@ import com.example.book.ResultEx.Companion.asResult
 import com.example.book.domains.Writers
 import com.example.book.repository.BookWriteRepository
 import javax.inject.Inject
+import javax.inject.Named
 
 class AuthorsWritingNewBook
-@Inject constructor(private val authorFinder: AuthorFinder, private val bookWriteRepository: BookWriteRepository) {
+@Inject constructor(
+    @Named("query") private val authorFinder: AuthorFinder,
+    private val bookWriteRepository: BookWriteRepository) {
 
   fun <A: Any, B: Any> A?.onNull(f: () -> B): ResultEx<B, A> = this.asResult(f)
 
