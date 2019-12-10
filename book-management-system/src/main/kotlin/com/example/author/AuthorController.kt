@@ -61,7 +61,6 @@ class AuthorController
           .validationErrorToHttpError
           .flatMap { authorDao.findById(it).nullToHttpError { HttpStatus.NOT_FOUND to listOf("author not found(id:$id)") } }
           .run(
-              onSuccess = {},
               onFailure = { logger.info("getAuthor: failure, id: {}, error: {}", id, it.second) })
           .map { HttpResponse.ok(AuthorJson(it)) as HttpResponse<*> }
           .rescue { it.toResponse() }
@@ -98,7 +97,6 @@ class AuthorController
           .mapFailure { pair -> HttpStatus.NOT_FOUND to pair.second }
           .flatMap { findBooks.apply(it) }
           .run(
-              onSuccess = {},
               onFailure = { logger.info("getAuthorsBook: failure, author: {}, book: {}", author, book) })
           .map { bookJson -> HttpResponse.ok(bookJson) as HttpResponse<*> }
           .rescue { it.toResponse() }

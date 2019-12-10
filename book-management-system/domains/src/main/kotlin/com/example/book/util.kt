@@ -30,7 +30,7 @@ sealed class ResultEx<FAILURE: Any, SUCCESS: Any> {
 
   abstract fun <EX: Exception> getOrThrow(f: (FAILURE) -> EX): SUCCESS
 
-  abstract fun run(onSuccess: (SUCCESS) -> Unit, onFailure: (FAILURE) -> Unit): ResultEx<FAILURE, SUCCESS>
+  abstract fun run(onSuccess: (SUCCESS) -> Unit = {}, onFailure: (FAILURE) -> Unit): ResultEx<FAILURE, SUCCESS>
 
   companion object {
     fun <F: Any, S: Any> S?.asResult(f: () -> F): ResultEx<F, S> = if (this == null) Failure(f()) else Success(this) 
