@@ -16,8 +16,10 @@
 package com.example.book.repository
 
 import com.example.book.domains.PublishedBook
+import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
 
 interface BookFinder {
   fun findById(id: BookId): PublishedBook?
+  fun findByAuthorIdAndByBookId(authorId: AuthorId, bookId: BookId): PublishedBook?
 }

@@ -16,8 +16,11 @@
 package com.example.book.infra.repositories
 
 import com.example.book.domains.PublishedBook
+import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
 import com.example.book.infra.dao.BookDao
+import com.example.book.infra.dao.WritingDao
+import com.example.book.infra.dao.findByAuthorIdAndByBookId
 import com.example.book.infra.dao.findPublishedBookById
 import com.example.book.repository.BookFinder
 import javax.inject.Inject
@@ -28,7 +31,11 @@ import javax.inject.Singleton
 @Singleton
 class BookFinderImpl
 @Inject constructor(
+    private val writingDao: WritingDao,
     private val bookDao: BookDao): BookFinder {
 
   override fun findById(id: BookId): PublishedBook? = bookDao.findPublishedBookById(id)
+
+  override fun findByAuthorIdAndByBookId(authorId: AuthorId, bookId: BookId): PublishedBook? =
+      writingDao.findByAuthorIdAndByBookId(authorId, bookId)
 }

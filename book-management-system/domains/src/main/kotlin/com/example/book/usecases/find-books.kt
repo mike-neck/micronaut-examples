@@ -20,12 +20,19 @@ import com.example.book.Reason
 import com.example.book.ResultEx
 import com.example.book.ResultEx.Companion.asResult
 import com.example.book.domains.PublishedBook
+import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
 import com.example.book.repository.BookFinder
 import javax.inject.Inject
+import javax.inject.Named
 
 class FindBooks
-@Inject constructor(private val bookFinder: BookFinder) {
+@Inject constructor(
+    @Named("query") private val bookFinder: BookFinder) {
+
+  operator fun invoke(authorId: AuthorId, bookId: BookId): ResultEx<Reason, PublishedBook> =
+      bookFinder.findByAuthorIdAndByBookId(authorId, bookId)
+          .asResult { Cause.NOT_FOUND.with("not found(author:${authorId.value},book:${bookId.value})") }
 
   operator fun invoke(bookId: BookId): ResultEx<Reason, PublishedBook> =
       bookFinder.findById(bookId)

@@ -21,9 +21,11 @@ import com.example.book.attributes.*
 import com.example.book.domains.AuthorName
 import com.example.book.domains.Manuscript
 import com.example.book.ids.AuthorId
+import com.example.book.ids.BookId
 import com.example.book.infra.dao.AuthorDao
 import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.CreateNewAuthor
+import com.example.book.usecases.FindBooks
 import com.example.http.*
 import com.example.json.AuthorJson
 import com.example.json.BookJson
@@ -40,6 +42,7 @@ class AuthorController
 @Inject constructor(
     private val createNewAuthor: CreateNewAuthor,
     private val writingNewBook: AuthorsWritingNewBook,
+    private val findBooks: FindBooks,
     private val authorDao: AuthorDao
 ) {
 
@@ -78,6 +81,28 @@ class AuthorController
               onFailure = { logger.info("createNewAuthor: failure, firstName: {}, lastName: {}, error: {}", firstName, lastName, it.second) })
           .map { HttpResponse.created<AuthorJson>(URI.create("/authors/${it.id}")).body(it) as HttpResponse<*> }
           .rescue { it.toResponse() }
+
+  private fun FindBooks.apply(pair: Pair<AuthorId, BookId>): ResultEx<HttpError, BookJson> =
+      this(pair.first, pair.second)
+          .map { publishedBook -> BookJson(publishedBook) }
+          .mapFailure { it.toHttpError() }
+
+  @Get("{id}/books/{bookId}")
+  @Produces("application/json")
+  fun getAuthorsBook(
+      @PathVariable("id") author: String,
+      @PathVariable("bookId") book: String): HttpResponse<*> =
+      AuthorId.fromString(author).validationError { listOf("not found(author:$author,book:$book)") }
+          .zipWith { BookId.fromString(book).validationError { listOf("not found(author:$author,book:$book)") } }
+          .validationErrorToHttpError
+          .mapFailure { pair -> HttpStatus.NOT_FOUND to pair.second }
+          .flatMap { findBooks.apply(it) }
+          .run(
+              onSuccess = {},
+              onFailure = { logger.info("getAuthorsBook: failure, author: {}, book: {}", author, book) })
+          .map { bookJson -> HttpResponse.ok(bookJson) as HttpResponse<*> }
+          .rescue { it.toResponse() }
+  
 
   private fun AuthorsWritingNewBook.apply(pair: Pair<AuthorId, Manuscript>): ResultEx<HttpError, BookJson> =
       this(pair.first, pair.second)
