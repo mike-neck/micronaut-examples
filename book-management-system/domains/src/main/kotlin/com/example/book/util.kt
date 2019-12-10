@@ -20,12 +20,17 @@ import kotlin.Exception
 
 class GatewayException(message: String, cause: Exception? = null): RuntimeException(message, cause)
 
-sealed class ResultEx<FAILURE, SUCCESS> {
-  abstract fun <NEXT> map(f: (SUCCESS) -> NEXT): ResultEx<FAILURE, NEXT>
-  abstract fun <NEXT> flatMap(f: (SUCCESS) -> ResultEx<FAILURE, NEXT>): ResultEx<FAILURE, NEXT>
+sealed class ResultEx<FAILURE: Any, SUCCESS: Any> {
+  abstract fun <NEXT: Any> map(f: (SUCCESS) -> NEXT): ResultEx<FAILURE, NEXT>
+  abstract fun <NEXT: Any> flatMap(f: (SUCCESS) -> ResultEx<FAILURE, NEXT>): ResultEx<FAILURE, NEXT>
+
   abstract fun rescue(f: (FAILURE) -> SUCCESS): SUCCESS
 
+  abstract fun <ERR: Any> mapFailure(f: (FAILURE) -> ERR): ResultEx<ERR, SUCCESS>
+
   abstract fun <EX: Exception> getOrThrow(f: (FAILURE) -> EX): SUCCESS
+
+  abstract fun run(onSuccess: (SUCCESS) -> Unit, onFailure: (FAILURE) -> Unit): ResultEx<FAILURE, SUCCESS>
 
   companion object {
     fun <F: Any, S: Any> S?.asResult(f: () -> F): ResultEx<F, S> = if (this == null) Failure(f()) else Success(this) 
@@ -36,25 +41,37 @@ sealed class ResultEx<FAILURE, SUCCESS> {
   }
 }
 
-data class Success<FAILURE, SUCCESS>(val value: SUCCESS): ResultEx<FAILURE, SUCCESS>() {
+data class Success<FAILURE: Any, SUCCESS: Any>(val value: SUCCESS): ResultEx<FAILURE, SUCCESS>() {
 
-  override fun <NEXT> map(f: (SUCCESS) -> NEXT): ResultEx<FAILURE, NEXT> = Success(f(value))
+  override fun <NEXT: Any> map(f: (SUCCESS) -> NEXT): ResultEx<FAILURE, NEXT> = Success(f(value))
 
-  override fun <NEXT> flatMap(f: (SUCCESS) -> ResultEx<FAILURE, NEXT>): ResultEx<FAILURE, NEXT> = f(value)
+  override fun <NEXT: Any> flatMap(f: (SUCCESS) -> ResultEx<FAILURE, NEXT>): ResultEx<FAILURE, NEXT> = f(value)
 
   override fun rescue(f: (FAILURE) -> SUCCESS): SUCCESS = value
+
+  override fun <ERR: Any> mapFailure(f: (FAILURE) -> ERR): ResultEx<ERR, SUCCESS> = Success(value)
+
   override fun <EX : Exception> getOrThrow(f: (FAILURE) -> EX): SUCCESS = value
+
+  override fun run(onSuccess: (SUCCESS) -> Unit, onFailure: (FAILURE) -> Unit): ResultEx<FAILURE, SUCCESS> =
+      this.also { onSuccess(value) }
+      
 } 
 
-data class Failure<FAILURE, SUCCESS>(val value: FAILURE): ResultEx<FAILURE, SUCCESS>() {
+data class Failure<FAILURE: Any, SUCCESS: Any>(val value: FAILURE): ResultEx<FAILURE, SUCCESS>() {
 
-  override fun <NEXT> map(f: (SUCCESS) -> NEXT): ResultEx<FAILURE, NEXT> = Failure(value)
+  override fun <NEXT: Any> map(f: (SUCCESS) -> NEXT): ResultEx<FAILURE, NEXT> = Failure(value)
 
-  override fun <NEXT> flatMap(f: (SUCCESS) -> ResultEx<FAILURE, NEXT>): ResultEx<FAILURE, NEXT> = Failure(value)
+  override fun <NEXT: Any> flatMap(f: (SUCCESS) -> ResultEx<FAILURE, NEXT>): ResultEx<FAILURE, NEXT> = Failure(value)
 
   override fun rescue(f: (FAILURE) -> SUCCESS): SUCCESS = f(value)
 
+  override fun <ERR : Any> mapFailure(f: (FAILURE) -> ERR): ResultEx<ERR, SUCCESS> = Failure(f(value))
+
   override fun <EX : Exception> getOrThrow(f: (FAILURE) -> EX): SUCCESS = throw f(value)
+
+  override fun run(onSuccess: (SUCCESS) -> Unit, onFailure: (FAILURE) -> Unit): ResultEx<FAILURE, SUCCESS> =
+      this.also { onFailure(value) }
 } 
 
 enum class Cause {
