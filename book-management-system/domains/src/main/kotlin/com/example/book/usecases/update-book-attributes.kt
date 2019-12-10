@@ -26,8 +26,10 @@ import com.example.book.repository.BookWriteRepository
 
 import com.example.book.ResultEx.Companion.asResult
 import com.example.book.domains.BookChange
+import javax.inject.Inject
 
-class UpdateBookAttributes(private val bookFinder: BookFinder, private val bookWriteRepository: BookWriteRepository) {
+class UpdateBookAttributes
+@Inject constructor(private val bookFinder: BookFinder, private val bookWriteRepository: BookWriteRepository) {
 
   operator fun invoke(id: BookId, update: BookUpdate): ResultEx<Reason, PublishedBook> =
       bookFinder.findById(id).asResult { Cause.NOT_FOUND.with("not found(${id.value})") }

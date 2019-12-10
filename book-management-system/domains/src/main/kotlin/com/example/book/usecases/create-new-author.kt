@@ -22,8 +22,10 @@ import com.example.book.ResultEx.Companion.asResult
 import com.example.book.domains.Author
 import com.example.book.domains.AuthorName
 import com.example.book.repository.AuthorWriteRepository
+import javax.inject.Inject
 
-class CreateNewAuthor(private val authorWriteRepository: AuthorWriteRepository) {
+class CreateNewAuthor
+@Inject constructor(private val authorWriteRepository: AuthorWriteRepository) {
   operator fun invoke(authorName: AuthorName): ResultEx<Reason, Author> =
       authorWriteRepository.save(authorName)
           .asResult { Cause.CONFLICT.with("failed to save author(${authorName.firstName.value},${authorName.lastName.value})") }

@@ -23,8 +23,10 @@ import com.example.book.repository.BookFinder
 import com.example.book.repository.BookWriteRepository
 
 import com.example.book.ResultEx.Companion.asResult
+import javax.inject.Inject
 
-class DeleteBook(private val bookFinder: BookFinder, private val bookWriteRepository: BookWriteRepository) {
+class DeleteBook
+@Inject constructor(private val bookFinder: BookFinder, private val bookWriteRepository: BookWriteRepository) {
 
   operator fun invoke(id: BookId): ResultEx<Reason, Unit> =
       bookFinder.findById(id)

@@ -22,8 +22,10 @@ import com.example.book.ResultEx.Companion.asResult
 import com.example.book.domains.PublishedBook
 import com.example.book.ids.BookId
 import com.example.book.repository.BookFinder
+import javax.inject.Inject
 
-class FindBooks(private val bookFinder: BookFinder) {
+class FindBooks
+@Inject constructor(private val bookFinder: BookFinder) {
 
   operator fun invoke(bookId: BookId): ResultEx<Reason, PublishedBook> =
       bookFinder.findById(bookId)
