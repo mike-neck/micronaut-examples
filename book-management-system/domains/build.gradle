@@ -1,5 +1,7 @@
 plugins {
     id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.kotlin.kapt"
+    id "org.jetbrains.kotlin.plugin.allopen"
 }
 
 repositories {
@@ -10,6 +12,12 @@ repositories {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+
+    compileOnly 'javax.inject:javax.inject:1'
+    kapt platform("io.micronaut:micronaut-bom:$micronautVersion")
+    kapt "io.micronaut:micronaut-inject-java"
+    compileOnly platform("io.micronaut:micronaut-bom:$micronautVersion")
+    compileOnly "io.micronaut:micronaut-inject"
 
     testImplementation "io.mockk:mockk:1.9.3"
     testImplementation "io.kotlintest:kotlintest-runner-junit5:3.3.2"
@@ -32,4 +40,8 @@ compileTestKotlin {
         jvmTarget = '11'
         javaParameters = true
     }
+}
+
+allOpen {
+    annotation("io.micronaut.aop.Around")
 }

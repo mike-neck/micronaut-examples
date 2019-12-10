@@ -21,6 +21,11 @@ dependencies {
     implementation "org.seasar.doma:doma:2.25.1"
     kapt "org.seasar.doma:doma:2.25.1"
 
+    kapt platform("io.micronaut:micronaut-bom:$micronautVersion")
+    kapt "io.micronaut:micronaut-inject-java"
+    compileOnly platform("io.micronaut:micronaut-bom:$micronautVersion")
+    compileOnly "io.micronaut:micronaut-inject"
+
     testImplementation "com.h2database:h2:1.4.199"
 
     testImplementation "org.slf4j:slf4j-simple:1.7.29"
@@ -93,4 +98,8 @@ import org.seasar.doma.DomainConverters
 interface Converters
 """, 'UTF-8')
     }
+}
+
+allOpen {
+    annotation("io.micronaut.aop.Around")
 }
