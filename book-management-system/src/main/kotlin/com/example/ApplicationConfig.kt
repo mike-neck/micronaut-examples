@@ -27,12 +27,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import javax.sql.DataSource
 
+@Singleton
 @Factory
 class ApplicationConfig {
 
+  val atomicLong: AtomicLong = AtomicLong(0)
+
   @Bean
   fun idGen(): IdGen = object : IdGen {
-    val atomicLong: AtomicLong = AtomicLong(0)
     override fun newLongId(): Long = atomicLong.incrementAndGet()
   }
 }

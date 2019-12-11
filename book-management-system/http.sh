@@ -20,17 +20,17 @@ curl -i http://localhost:8080/authors/1/books -X POST -d 'name=罪と罰' -d 'pr
 echo ""
 echo ""
 
-echo "curl -i http://localhost:8080/authors/1/books/1"
-curl -i http://localhost:8080/authors/1/books/1
+echo "curl -i http://localhost:8080/authors/1/books/2"
+curl -i http://localhost:8080/authors/1/books/2
 echo ""
 echo ""
 
-echo "curl -i http://localhost:8080/books/1"
-curl -i http://localhost:8080/books/1
+echo "curl -i http://localhost:8080/books/2"
+curl -i http://localhost:8080/books/2
 echo ""
 echo ""
 
-echo "curl -i http://localhost:8080/books/1 -X PATCH -H 'content-type:application/json' -d '{\"name\":\"罪と罰 2nd edition\"}'"
-curl -i http://localhost:8080/books/1 -X PATCH -H 'content-type:application/json' -d '{"name":"罪と罰 2nd edition"}'
+echo "curl -i http://localhost:8080/books/2 -X PATCH -H 'content-type:application/json' -d '{\"name\":\"罪と罰 2nd edition\"}'"
+curl -i http://localhost:8080/books/2 -X PATCH -H 'content-type:application/json' -d '{"name":"罪と罰 2nd edition"}'
 echo ""
 echo ""
