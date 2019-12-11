@@ -38,11 +38,3 @@ fun <S: Any, R: Any> Result<S>.map(f: (S) -> R): Result<R> =
       this.entity == null -> Result<R>(this.count, null)
       else -> Result(this.count, f(this.entity))
     }
-
-fun <A: Any, B: Any> A?.zipWith(f: () -> B?): Pair<A, B>? =
-    if (this == null) null
-    else f()?.let { this to it }
-
-fun <A: Any, B: Any> A?.zip(f: (A) -> B?): Pair<A, B>? =
-    if (this == null) null
-    else f(this)?.let { this to it }

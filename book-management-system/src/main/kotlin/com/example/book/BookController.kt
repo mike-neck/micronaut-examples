@@ -16,23 +16,23 @@
 package com.example.book
 
 import com.example.Logger
+import com.example.book.attributes.BookName
+import com.example.book.attributes.Price
+import com.example.book.attributes.PublicationDate
+import com.example.book.domains.BookUpdate
 import com.example.book.ids.BookId
 import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.DeleteBook
 import com.example.book.usecases.FindBooks
 import com.example.book.usecases.UpdateBookAttributes
-import com.example.http.HttpError
+import com.example.http.nullToHttpError
 import com.example.http.toHttpError
 import com.example.http.toResponse
-import com.example.http.validationErrorToHttpError
 import com.example.json.BookJson
 import com.example.util.nullToValidationError
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
-import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.Produces
+import io.micronaut.http.annotation.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,13 +47,36 @@ class BookController
 
   @Get("{id}")
   @Produces("application/json")
-  fun getBooks(@PathVariable id: String?): HttpResponse<*> =
+  fun getBook(@PathVariable id: String?): HttpResponse<*> =
       BookId.fromString(id).nullToValidationError { listOf("not found book($id)") }
           .mapFailure { validationError -> HttpStatus.NOT_FOUND to validationError }
-          .flatMap { bookQueryService.findBookById(it).mapFailure { it.toHttpError() } }
-          .run(onFailure = { logger.info("getBooks: failure, book: {}, status: {}, error: {}", id, it.first, it.second) })
+          .flatMap { bookQueryService.findBookById(it).mapFailure { reason -> reason.toHttpError() } }
+          .run(onFailure = { logger.info("getBook: failure, book: {}, status: {}, error: {}", id, it.first, it.second) })
           .map { HttpResponse.ok(it) as HttpResponse<*> }
           .rescue { it.toResponse() }
+
+  @Patch("{id}")
+  @Consumes("application/json", "application/x-www-form-urlencoded")
+  @Produces("application/json")
+  fun updateBook(
+      @PathVariable("id") id: String?,
+      @Body("name") name: String?,
+      @Body("price") price: String?,
+      @Body("publish") publish: String?
+  ): HttpResponse<*> =
+      BookId.fromString(id).nullToHttpError { HttpStatus.NOT_FOUND to listOf("not found book($id)") }
+          .map { it to bookUpdate(name, price, publish) }
+          .flatMap { pair -> bookCommandService.updateBook(pair.first, pair.second).mapFailure { reason -> reason.toHttpError() } }
+          .run(
+              onSuccess = { logger.info("updateBook: success, book: {}", it.id) },
+              onFailure = { logger.info("updateBook: failure, book: {}, status: {}, error: {}", id, it.first, it.second) }
+          ).map { HttpResponse.ok(it) as HttpResponse<*> }
+          .rescue { it.toResponse() }
+
+  companion object {
+    fun bookUpdate(name: String?, price: String?, publish: String?): BookUpdate =
+        BookUpdate(BookName.from(name), PublicationDate.from(publish), Price.from(price))
+  }
 }
 
 @Singleton
@@ -71,4 +94,7 @@ class BookCommandService
     private val authorsWritingNewBook: AuthorsWritingNewBook,
     private val updateBookAttributes: UpdateBookAttributes,
     private val deleteBook: DeleteBook
-)
+) {
+  fun updateBook(bookId: BookId, bookUpdate: BookUpdate): ResultEx<Reason, BookJson> =
+      updateBookAttributes(bookId, bookUpdate).map { book -> BookJson(book) }
+}
