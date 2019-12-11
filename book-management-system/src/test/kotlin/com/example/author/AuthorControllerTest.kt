@@ -15,18 +15,17 @@
  */
 package com.example.author
 
-import com.example.book.ids.AuthorId
 import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.CreateNewAuthor
 import com.example.book.usecases.FindAuthors
 import com.example.book.usecases.FindBooks
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.BehaviorSpec
+import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.RxHttpClient
 import io.micronaut.http.client.annotation.Client
+import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MicronautTest
-import io.micronaut.test.extensions.kotlintest.MicronautKotlinTestExtension.getMock
-import io.mockk.every
-import org.seasar.doma.internal.util.AssertionUtil.assertEquals
 
 @MicronautTest
 class AuthorControllerTest(
@@ -37,15 +36,12 @@ class AuthorControllerTest(
     @Client("/authors") private val client: RxHttpClient
 ): BehaviorSpec({
 
-  // TODO 書いたが動かない
   given("authorDao returns no record") {
-    val mockFindAuthors = getMock(findAuthors)
-    println(mockFindAuthors)
-    every { mockFindAuthors(AuthorId(1L)) } returns null
     `when`("curl http://example.com/authors/1") {
-      val response = client.toBlocking().exchange<Unit>("/1")
+      val response = client.toBlocking().runCatching { exchange<Unit>("/1") }
       then("http status = 404") {
-        assertEquals(404, response.code())
+        val responseException = response.exceptionOrNull() as HttpClientResponseException
+        responseException.status shouldBe HttpStatus.NOT_FOUND
       }
     }
   }
