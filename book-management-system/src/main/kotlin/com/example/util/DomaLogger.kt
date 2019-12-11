@@ -16,6 +16,7 @@
 package com.example.util
 
 import org.seasar.doma.jdbc.AbstractJdbcLogger
+import org.seasar.doma.jdbc.Sql
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.function.Supplier
@@ -26,6 +27,15 @@ class DomaLogger: AbstractJdbcLogger<Level>(Level.INFO) {
     fun onNormal(message: String)
     fun onException(message: String, exception: Throwable)
   }
+
+  override fun logDaoMethodEntering(callerClassName: String?, callerMethodName: String?, args: Array<out Any>?, level: Level?, messageSupplier: Supplier<String>?) =
+      log(Level.DEBUG, callerClassName, callerMethodName, null, messageSupplier)
+
+  override fun logDaoMethodExiting(callerClassName: String?, callerMethodName: String?, result: Any?, level: Level?, messageSupplier: Supplier<String>?) =
+      log(Level.DEBUG, callerClassName, callerMethodName, null, messageSupplier)
+
+  override fun logSql(callerClassName: String?, callerMethodName: String?, sql: Sql<*>?, level: Level?, messageSupplier: Supplier<String>?) =
+      log(Level.DEBUG, callerClassName, callerMethodName, null, messageSupplier)
 
   override fun log(
       level: Level?,
