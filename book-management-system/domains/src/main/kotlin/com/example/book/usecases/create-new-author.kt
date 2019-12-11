@@ -19,11 +19,13 @@ import com.example.book.Cause
 import com.example.book.Reason
 import com.example.book.ResultEx
 import com.example.book.ResultEx.Companion.asResult
+import com.example.book.annotations.UseCase
 import com.example.book.domains.Author
 import com.example.book.domains.AuthorName
 import com.example.book.repository.AuthorWriteRepository
 import javax.inject.Inject
 
+@UseCase
 class CreateNewAuthor
 @Inject constructor(private val authorWriteRepository: AuthorWriteRepository) {
   operator fun invoke(authorName: AuthorName): ResultEx<Reason, Author> =

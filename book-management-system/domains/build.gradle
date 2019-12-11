@@ -44,4 +44,5 @@ compileTestKotlin {
 
 allOpen {
     annotation("io.micronaut.aop.Around")
+    annotation('com.example.book.annotations.UseCase')
 }

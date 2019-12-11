@@ -19,6 +19,7 @@ import com.example.book.Cause
 import com.example.book.Reason
 import com.example.book.ResultEx
 import com.example.book.ResultEx.Companion.asResult
+import com.example.book.annotations.UseCase
 import com.example.book.domains.PublishedBook
 import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
@@ -26,6 +27,7 @@ import com.example.book.repository.BookFinder
 import javax.inject.Inject
 import javax.inject.Named
 
+@UseCase
 class FindBooks
 @Inject constructor(
     @Named("query") private val bookFinder: BookFinder) {
