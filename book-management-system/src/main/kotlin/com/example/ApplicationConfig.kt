@@ -16,9 +16,11 @@
 package com.example
 
 import com.example.book.ids.IdGen
+import com.example.util.DomaLogger
 import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
 import org.seasar.doma.jdbc.Config
+import org.seasar.doma.jdbc.JdbcLogger
 import org.seasar.doma.jdbc.Naming
 import org.seasar.doma.jdbc.dialect.Dialect
 import org.seasar.doma.jdbc.dialect.H2Dialect
@@ -50,6 +52,8 @@ class DatabaseConfig
   override fun getNaming(): Naming = Naming.SNAKE_LOWER_CASE
 
   override fun getDialect(): Dialect = h2Dialect
+
+  override fun getJdbcLogger(): JdbcLogger = DomaLogger()
 
   companion object {
     val h2Dialect: Dialect = H2Dialect()
