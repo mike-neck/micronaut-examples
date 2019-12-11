@@ -34,3 +34,8 @@ echo "curl -i http://localhost:8080/books/2 -X PATCH -H 'content-type:applicatio
 curl -i http://localhost:8080/books/2 -X PATCH -H 'content-type:application/json' -d '{"name":"罪と罰 2nd edition"}'
 echo ""
 echo ""
+
+echo "curl -i http://localhost:8080/books/2 -X DELETE"
+curl -i http://localhost:8080/books/2 -X DELETE
+echo ""
+echo ""

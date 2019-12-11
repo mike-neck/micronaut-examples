@@ -25,6 +25,7 @@ import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.DeleteBook
 import com.example.book.usecases.FindBooks
 import com.example.book.usecases.UpdateBookAttributes
+import com.example.http.HttpError
 import com.example.http.nullToHttpError
 import com.example.http.toHttpError
 import com.example.http.toResponse
@@ -73,6 +74,16 @@ class BookController
           ).map { HttpResponse.ok(it) as HttpResponse<*> }
           .rescue { it.toResponse() }
 
+  @Delete("{id}")
+  fun deleteBook(@PathVariable("id") id: String?): HttpResponse<*> =
+      BookId.fromString(id).nullToHttpError { HttpStatus.NOT_FOUND to listOf("not found book($id)") }
+          .flatMap { bookId -> bookCommandService.deleteBookById(bookId).mapFailure { it.toHttpError() } }
+          .run(
+              onSuccess = { logger.info("deleteBook: success, book: {}", id) },
+              onFailure = { logger.info("deleteBook: failure, book: {}, status: {}, error: {}", id, it.first, it.second) }
+          ).map { HttpResponse.noContent<Unit>() as HttpResponse<*> }
+          .rescue { it.toResponse() }
+
   companion object {
     fun bookUpdate(name: String?, price: String?, publish: String?): BookUpdate =
         BookUpdate(BookName.from(name), PublicationDate.from(publish), Price.from(price))
@@ -97,4 +108,6 @@ class BookCommandService
 ) {
   fun updateBook(bookId: BookId, bookUpdate: BookUpdate): ResultEx<Reason, BookJson> =
       updateBookAttributes(bookId, bookUpdate).map { book -> BookJson(book) }
+
+  fun deleteBookById(bookId: BookId): ResultEx<Reason, Unit> = deleteBook(bookId)
 }
