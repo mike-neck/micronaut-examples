@@ -16,9 +16,9 @@
 package com.example.author
 
 import com.example.book.ids.AuthorId
-import com.example.book.infra.dao.AuthorDao
 import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.CreateNewAuthor
+import com.example.book.usecases.FindAuthors
 import com.example.book.usecases.FindBooks
 import io.kotlintest.specs.BehaviorSpec
 import io.micronaut.http.client.RxHttpClient
@@ -33,14 +33,15 @@ class AuthorControllerTest(
     private val createNewAuthor: CreateNewAuthor,
     private val writingNewBook: AuthorsWritingNewBook,
     private val findBooks: FindBooks,
-    private val authorDao: AuthorDao,
+    private val findAuthors: FindAuthors,
     @Client("/authors") private val client: RxHttpClient
 ): BehaviorSpec({
 
   // TODO 書いたが動かない
   given("authorDao returns no record") {
-    val mockAuthorDao = getMock(authorDao)
-    every { mockAuthorDao.findById(AuthorId(1L)) } returns null
+    val mockFindAuthors = getMock(findAuthors)
+    println(mockFindAuthors)
+    every { mockFindAuthors(AuthorId(1L)) } returns null
     `when`("curl http://example.com/authors/1") {
       val response = client.toBlocking().exchange<Unit>("/1")
       then("http status = 404") {

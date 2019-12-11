@@ -25,6 +25,7 @@ import com.example.book.ids.BookId
 import com.example.book.infra.dao.AuthorDao
 import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.CreateNewAuthor
+import com.example.book.usecases.FindAuthors
 import com.example.book.usecases.FindBooks
 import com.example.http.*
 import com.example.json.AuthorJson
@@ -43,7 +44,7 @@ class AuthorController
     private val createNewAuthor: CreateNewAuthor,
     private val writingNewBook: AuthorsWritingNewBook,
     private val findBooks: FindBooks,
-    private val authorDao: AuthorDao
+    private val findAuthors: FindAuthors
 ) {
 
   private val logger: Logger<AuthorController> = Logger.get()
@@ -59,7 +60,7 @@ class AuthorController
       AuthorId.fromString(id)
           .nullToValidationError { listOf("invalid number format(id:$id)") }
           .validationErrorToHttpError
-          .flatMap { authorDao.findById(it).nullToHttpError { HttpStatus.NOT_FOUND to listOf("author not found(id:$id)") } }
+          .flatMap { findAuthors(it).nullToHttpError { HttpStatus.NOT_FOUND to listOf("author not found(id:$id)") } }
           .run(
               onFailure = { logger.info("getAuthor: failure, id: {}, error: {}", id, it.second) })
           .map { HttpResponse.ok(AuthorJson(it)) as HttpResponse<*> }
