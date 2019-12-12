@@ -21,11 +21,9 @@ import com.example.book.attributes.Price
 import com.example.book.attributes.PublicationDate
 import com.example.book.domains.BookUpdate
 import com.example.book.ids.BookId
-import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.DeleteBook
 import com.example.book.usecases.FindBooks
 import com.example.book.usecases.UpdateBookAttributes
-import com.example.http.HttpError
 import com.example.http.nullToHttpError
 import com.example.http.toHttpError
 import com.example.http.toResponse
@@ -102,7 +100,6 @@ class BookQueryService
 @Singleton
 class BookCommandService
 @Inject constructor(
-    private val authorsWritingNewBook: AuthorsWritingNewBook,
     private val updateBookAttributes: UpdateBookAttributes,
     private val deleteBook: DeleteBook
 ) {
