@@ -16,14 +16,13 @@
 package com.example.author
 
 import com.example.DbCleaner
-import com.example.book.usecases.AuthorsWritingNewBook
-import com.example.book.usecases.CreateNewAuthor
-import com.example.book.usecases.FindAuthors
-import com.example.book.usecases.FindBooks
+import com.example.book.ids.IdGen
+import com.example.json.AuthorJson
 import com.example.sql
 import io.kotlintest.extensions.TestListener
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.BehaviorSpec
+import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.RxHttpClient
 import io.micronaut.http.client.annotation.Client
@@ -33,11 +32,8 @@ import javax.sql.DataSource
 
 @MicronautTest
 class AuthorControllerTest(
-    private val createNewAuthor: CreateNewAuthor,
-    private val writingNewBook: AuthorsWritingNewBook,
-    private val findBooks: FindBooks,
-    private val findAuthors: FindAuthors,
     private val dataSource: DataSource,
+    private val idGen: IdGen,
     @Client("/authors") private val client: RxHttpClient
 ) : BehaviorSpec({
 
@@ -63,6 +59,47 @@ class AuthorControllerTest(
       val response = client.toBlocking().exchange<Unit>("/2000")
       then("http status = 200") {
         response.status shouldBe HttpStatus.OK
+      }
+    }
+  }
+
+  given("no authors saved") {
+    `when`("""curl -X POST http://example.com/authors -d '{"firstName":"三成","lastName":"石田"}' -H 'content-type:application/json'""") {
+      val post = HttpRequest
+          .POST("", """{"firstName":"三成","lastName":"石田"}""")
+          .header("content-type", "application/json")
+      val result = client.toBlocking().exchange<String, AuthorJson>(post)
+      then("http status = 201") {
+        result.status shouldBe HttpStatus.CREATED
+      }
+      val expectedId = idGen.newLongId() - 1
+      then("http location header = /authors/$expectedId") {
+        result.header("location") shouldBe "/authors/$expectedId"
+      }
+    }
+  }
+
+  given("some authors saved") {
+    dataSource.connection.use {  connection ->
+      listOf("三成" to "石田", "元春" to "吉川", "恵瓊" to "安国寺").forEach { name ->
+        //language=sql
+        connection.sql("""
+          insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
+          VALUES ( ${idGen.newLongId()}, '${name.first}', '${name.second}' )
+        """.trimIndent())
+      }
+    }
+    `when`("""curl -X POST http://example.com/authors -d '{"fistName":"秀家","lastName":"宇喜多"}' -H 'content-type:application/json'""") {
+      val post = HttpRequest
+          .POST("", """{"firstName":"秀家","lastName":"宇喜多"}""")
+          .header("content-type", "application/json")
+      val result = client.toBlocking().exchange<String, AuthorJson>(post)
+      then("http status = 201") {
+        result.status shouldBe HttpStatus.CREATED
+      }
+      val expectedId = idGen.newLongId() - 1
+      then("http location header = /authors/$expectedId") {
+        result.header("Location") shouldBe "/authors/$expectedId"
       }
     }
   }
