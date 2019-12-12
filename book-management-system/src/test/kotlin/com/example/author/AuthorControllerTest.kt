@@ -164,3 +164,72 @@ class AuthorControllerWriteBookTest(
     }
   }
 })
+
+@MicronautTest
+class AuthorControllerGetAuthorsBookTest(
+    override val dataSource: DataSource,
+    private val idGen: IdGen,
+    @Client("/authors") private val client: RxHttpClient
+) : IntegrationBehaviorSpec({
+
+  given("no authors saved") {
+    `when`("""curl http://example.com/authors/1/books/2""") {
+      val result = client.toBlocking()
+          .runCatching { exchange<Unit>("/1/books/2") }
+      then("http status is 404") {
+        val ex = result.exceptionOrNull() ?: throw AssertionError("expected error, but not")
+        val httpError = ex as? HttpClientResponseException
+            ?: throw AssertionError("expected to be instance of HttpClientResponseException, but ${ex.javaClass}")
+        httpError.status shouldBe HttpStatus.NOT_FOUND
+      }
+    }
+  }
+
+  given("author exists but book not exists") {
+    dataSource.connection.use { connection ->  
+      //language=sql
+      connection.sql("""
+        insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
+        VALUES ( 2000, '三成', '石田' )
+      """.trimIndent())
+    }
+    `when`("""curl http://example.com/authors/1/books/2""") {
+      val result = client.toBlocking()
+          .runCatching { exchange<Unit>("/1/books/2") }
+      then("http status is 404") {
+        val ex = result.exceptionOrNull() ?: throw AssertionError("expected error, but not")
+        val httpError = ex as? HttpClientResponseException
+            ?: throw AssertionError("expected to be instance of HttpClientResponseException, but ${ex.javaClass}")
+        httpError.status shouldBe HttpStatus.NOT_FOUND
+      }
+    }
+  }
+
+  given("author and book existing") {
+    val authorId = idGen.newLongId()
+    val bookId = idGen.newLongId()
+    dataSource.connection.use { connection ->  
+      //language=sql
+      connection.sql("""
+        insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
+        VALUES ( $authorId, '三成', '石田' )
+      """.trimIndent())
+      //language=sql
+      connection.sql("""
+        insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE)
+        VALUES ( $bookId, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
+      """.trimIndent())
+      //language=sql
+      connection.sql("""
+        insert into WRITINGS (BOOK_ID, AUTHOR_ID) VALUES ( $bookId, $authorId )
+      """.trimIndent())
+    }
+    `when`("""curl http://example.com/authors/$authorId/books/$bookId""") {
+      val result = client.toBlocking()
+          .exchange<BookJson>("/$authorId/books/$bookId")
+      then("http status is 200") {
+        result.status shouldBe HttpStatus.OK
+      }
+    }
+  }
+})
