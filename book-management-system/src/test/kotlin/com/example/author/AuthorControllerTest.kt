@@ -16,12 +16,13 @@
 package com.example.author
 
 import com.example.DbCleaner
+import com.example.IntegrationBehaviorSpec
 import com.example.book.ids.IdGen
 import com.example.json.AuthorJson
+import com.example.json.BookJson
 import com.example.sql
 import io.kotlintest.extensions.TestListener
 import io.kotlintest.shouldBe
-import io.kotlintest.specs.BehaviorSpec
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.RxHttpClient
@@ -31,13 +32,12 @@ import io.micronaut.test.annotation.MicronautTest
 import javax.sql.DataSource
 
 @MicronautTest
-class AuthorControllerTest(
-    private val dataSource: DataSource,
-    private val idGen: IdGen,
+class AuthorControllerGetAuthorTest(
+    override val dataSource: DataSource,
     @Client("/authors") private val client: RxHttpClient
-) : BehaviorSpec({
+) : IntegrationBehaviorSpec({
 
-  given("no records saved") {
+  given("For GET /authors/{id}, no authors saved") {
     `when`("curl http://example.com/authors/1") {
       val response = client.toBlocking().runCatching { exchange<Unit>("/1") }
       then("http status = 404") {
@@ -47,7 +47,7 @@ class AuthorControllerTest(
     }
   }
 
-  given("records saved") {
+  given("For GET /authors/{id}, authors saved") {
     dataSource.connection.use {
       //language=sql
       it.sql("""
@@ -62,7 +62,16 @@ class AuthorControllerTest(
       }
     }
   }
+}) {
+  override fun listeners(): List<TestListener> = listOf(DbCleaner(dataSource))
+}
 
+@MicronautTest
+class AuthorControllerCreateNewAuthorTest(
+    override val dataSource: DataSource,
+    private val idGen: IdGen,
+    @Client("/authors") private val client: RxHttpClient
+) : IntegrationBehaviorSpec({
   given("no authors saved") {
     `when`("""curl -X POST http://example.com/authors -d '{"firstName":"三成","lastName":"石田"}' -H 'content-type:application/json'""") {
       val post = HttpRequest
@@ -80,7 +89,7 @@ class AuthorControllerTest(
   }
 
   given("some authors saved") {
-    dataSource.connection.use {  connection ->
+    dataSource.connection.use { connection ->
       listOf("三成" to "石田", "元春" to "吉川", "恵瓊" to "安国寺").forEach { name ->
         //language=sql
         connection.sql("""
@@ -103,6 +112,55 @@ class AuthorControllerTest(
       }
     }
   }
-}) {
-  override fun listeners(): List<TestListener> = listOf(DbCleaner(dataSource))
-}
+})
+
+@MicronautTest
+class AuthorControllerWriteBookTest(
+    override val dataSource: DataSource,
+    private val idGen: IdGen,
+    @Client("/authors") private val client: RxHttpClient
+) : IntegrationBehaviorSpec({
+
+  given("no authors saved") {
+    `when`("""curl -X POST http://example.com/authors/1/books -d '{"name":"罪と罰","price":3200,"publish":"2019-12-11T12:34:56.789Z"}' -H 'content-type:application/json'""") {
+      val request = HttpRequest
+          .POST("1/books", """{"name":"罪と罰","price":3200,"publish":"2019-12-11T12:34:56.789Z"}""")
+          .contentType("application/json")
+      val result = client.toBlocking()
+          .runCatching { exchange<String, BookJson>(request) }
+      then("http status is not 2xx") {
+        result.isSuccess shouldBe false
+      }
+      then("http status is 404") {
+        val ex = result.exceptionOrNull() ?: throw AssertionError("exception is expected to be not null, but null")
+        val hcr = ex as? HttpClientResponseException
+            ?: throw AssertionError("expected to be instance of HttpClientResponseException, but ${ex.javaClass}")
+        hcr.status shouldBe HttpStatus.NOT_FOUND
+      }
+    }
+  }
+
+  given("author exists") {
+    val authorId = idGen.newLongId()
+    dataSource.connection.use { connection ->
+      //language=sql
+      connection.sql("""
+        insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
+        VALUES ( $authorId, '三成', '石田' )
+      """.trimIndent())
+    }
+    `when`("""curl -X POST http://example.com/authors/$authorId/books -d '{"name":"罪と罰","price":3200,"publish":"2019-12-11T12:34:56.789Z"}' -H 'content-type:application/json'""") {
+      val request = HttpRequest
+          .POST("$authorId/books", """{"name":"罪と罰","price":3200,"publish":"2019-12-11T12:34:56.789Z"}""")
+          .contentType("application/json")
+      val result = client.toBlocking().exchange<String, BookJson>(request)
+      then("http status is 201") {
+        result.status shouldBe HttpStatus.CREATED
+      }
+      val expectedBookId = idGen.newLongId() - 1
+      then("location = /authors/$authorId/books/$expectedBookId") {
+        result.header("location") shouldBe "/authors/$authorId/books/$expectedBookId"
+      }
+    }
+  }
+})

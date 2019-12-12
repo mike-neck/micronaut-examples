@@ -22,7 +22,6 @@ import com.example.book.domains.AuthorName
 import com.example.book.domains.Manuscript
 import com.example.book.ids.AuthorId
 import com.example.book.ids.BookId
-import com.example.book.infra.dao.AuthorDao
 import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.CreateNewAuthor
 import com.example.book.usecases.FindAuthors
