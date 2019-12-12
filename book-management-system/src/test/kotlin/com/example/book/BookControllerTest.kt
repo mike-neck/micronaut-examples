@@ -157,3 +157,52 @@ class BookControllerUpdateBookTest(
     }
   }
 })
+
+@MicronautTest
+class BookControllerDeleteBookTest(
+    override val dataSource: DataSource,
+    private val idGen: IdGen,
+    @Client("/books") private val client: RxHttpClient
+) : IntegrationBehaviorSpec ({
+
+  given("no books saved") {
+    `when`("""curl -X DELETE http://example.com/books/1""") {
+      val request = HttpRequest.DELETE<Unit>("/1")
+      val result = client.toBlocking().runCatching { exchange<Unit, Unit>(request) }
+      then("http status is 404") {
+        val ex = result.exceptionOrNull() ?: throw AssertionError("expected exception but no exception")
+        val httpError = ex as? HttpClientResponseException
+            ?: throw AssertionError("expected exception to be instance of HttpClientResponseException, but ${ex.javaClass}")
+        httpError.status shouldBe HttpStatus.NOT_FOUND
+      }
+    }
+  }
+
+  given("books saved") {
+    val authorId = idGen.newLongId()
+    val bookId = idGen.newLongId()
+    dataSource.connection.use { connection -> 
+      //language=sql
+      connection.sql("""
+        insert into AUTHORS (ID, FIRST_NAME, LAST_NAME)
+        VALUES ( $authorId, '三成', '石田' )
+      """.trimIndent())
+      //language=sql
+      connection.sql("""
+        insert into BOOKS (ID, NAME, PRICE, PUBLICATION_DATE)
+        VALUES ( $bookId, '罪と罰', 3200, '2019-12-11 12:34:56.789' )
+      """.trimIndent())
+      //language=sql
+      connection.sql("""
+        insert into WRITINGS (BOOK_ID, AUTHOR_ID) VALUES ( $bookId, $authorId )
+      """.trimIndent())
+    }
+    `when`("""curl -X DELETE http://example.com/books/$bookId""") {
+      val request = HttpRequest.DELETE<Unit>("/$bookId")
+      val result = client.toBlocking().exchange<Unit, Unit>(request)
+      then("http status is 204") {
+        result.status shouldBe HttpStatus.NO_CONTENT
+      }
+    }
+  }
+})
