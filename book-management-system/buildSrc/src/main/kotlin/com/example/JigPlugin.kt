@@ -18,30 +18,27 @@ package com.example
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.tasks.JavaExec
 
 open class JigPlugin : Plugin<Project> {
 
   override fun apply(project: Project) =
-      all(JigPluginExtension.configure(project), { jig ->
+      configure(JigPluginExtension.configure(project), { jig ->
         project.tasks.create("downloadJigJar", Download::class.java) {
           it.group = "jig"
           it.src("https://github.com/dddjava/jig/releases/download/2019.12.2/jig-cli-kt.jar")
-          it.dest(jig.jigJar)
+          it.dest(jig.jigJar.asFile)
           it.onlyIf { !jig.jigJar.asFile.get().exists() }
         }
       }, { jig ->
-        project.tasks.create("jigReport", JavaExec::class.java) {
+        project.tasks.create("jigReport", JigReportTask::class.java) {
+          it.dependsOn("downloadJigJar")
           it.group = "jig"
-          it.args = jig.arguments
-          it.classpath = project.fileTree(jig.jigJar)
-          it.main = "org.springframework.boot.loader.JarLauncher"
-          it.workingDir(jig.workingDir)
+          it.jig = jig
         }
       })
 
   companion object {
-    fun <T> all(ext: T, vararg configurations: (T) -> Unit): Unit =
-        listOf(*configurations).forEach { it.invoke(ext) }
+    fun <T> configure(with: T, vararg allConfigurations: (T) -> Unit): Unit =
+        listOf(*allConfigurations).forEach { it.invoke(with) }
   }
 }

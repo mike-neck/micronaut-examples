@@ -19,11 +19,12 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import java.io.File
+import java.io.Serializable
 
-open class JigPluginExtension(project: Project) {
+open class JigPluginExtension(project: Project): Serializable {
 
   val workingDir: RegularFileProperty
-  private val outputDirectory: RegularFileProperty
+  val outputDirectory: RegularFileProperty
   private val outputOmitPrefix: Property<String>
   private val jigModelPattern: Property<String>
   private val classes: RegularFileProperty
@@ -51,16 +52,16 @@ open class JigPluginExtension(project: Project) {
     this.jigJar.set(project.file("jig/jig.jar"))
   }
 
-  val arguments: List<String> get() = 
-      listOf(
-          "--project.path=${workingDir.asFile.get().absolutePath}",
-          "--outputDirectory=${outputDirectory.asFile.get().absolutePath}",
-          "--output.omit.prefix=${outputOmitPrefix.get()}",
-          "--jig.model.pattern=${jigModelPattern.get()}",
-          "--directory.classes=${classes.asFile.get().absolutePath}",
-          "--directory.resources=${resources.asFile.get().absolutePath}",
-          "--directory.sources=${sources.asFile.get().absolutePath}"
-      )
+  val arguments: List<String> get() =
+    listOf(
+        workingDir.asFile.map { "--project.path=${it.absolutePath}" }.getOrElse(""),
+        outputDirectory.asFile.map { "--outputDirectory=${it.absolutePath}" }.getOrElse(""),
+        outputOmitPrefix.map { "--output.omit.prefix=$it" }.getOrElse(""),
+        jigModelPattern.map { "--jig.model.pattern=$it" }.getOrElse(""),
+        classes.asFile.map { "--directory.classes=${it.absolutePath}" }.getOrElse(""),
+        resources.asFile.map { "--directory.resources=${it.absolutePath}" }.getOrElse(""),
+        sources.asFile.map { "--directory.sources=${it.absolutePath}" }.getOrElse("")
+    ).filter { it.isNotEmpty() }
 
   fun workingDir(dir: File) = workingDir.set(dir)
   fun outputDirectory(dir: File) = outputDirectory.set(dir)
