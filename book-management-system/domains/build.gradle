@@ -2,6 +2,7 @@ plugins {
     id "org.jetbrains.kotlin.jvm"
     id "org.jetbrains.kotlin.kapt"
     id "org.jetbrains.kotlin.plugin.allopen"
+    id "com.example.jig-kotlin-gradle-plugin"
 }
 
 repositories {
@@ -45,4 +46,8 @@ compileTestKotlin {
 allOpen {
     annotation("io.micronaut.aop.Around")
     annotation('com.example.book.annotations.UseCase')
+}
+
+jig {
+    jigJar(project.rootProject.file("jig/jig-cli-kt.jar"))
 }

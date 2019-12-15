@@ -16,3 +16,4 @@ infra-db/src/main/kotlin/com/example/book/infra/conv/Converters.kt
 .kotlintest/
 
 h2-db-schema/
+jig/

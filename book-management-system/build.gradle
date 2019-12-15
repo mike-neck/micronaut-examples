@@ -4,6 +4,7 @@ plugins {
     id "org.jetbrains.kotlin.plugin.allopen" version "1.3.50"
     id "com.github.johnrengelman.shadow" version "5.0.0"
     id "application"
+    id "com.example.jig-kotlin-gradle-plugin"
 }
 
 version "0.1"
@@ -88,3 +89,9 @@ shadowJar {
 
 run.classpath += configurations.developmentOnly
 run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1', '-Dcom.sun.management.jmxremote')
+
+jig {
+    jigJar(project.file('jig/jig-cli-kt.jar'))
+    //language=regex
+    jigModelPackagePattern('.+/(author|book)/.+')
+}
