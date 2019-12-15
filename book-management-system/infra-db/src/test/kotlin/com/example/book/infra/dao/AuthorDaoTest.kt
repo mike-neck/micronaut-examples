@@ -15,9 +15,9 @@
  */
 package com.example.book.infra.dao
 
-import com.example.book.attributes.AuthorFirstName
-import com.example.book.attributes.AuthorLastName
-import com.example.book.ids.AuthorId
+import com.example.attributes.AuthorFirstName
+import com.example.attributes.AuthorLastName
+import com.example.book.authors.AuthorId
 import com.example.book.infra.Db
 import com.example.book.infra.DbExtension
 import com.example.book.infra.entities.AuthorRecord

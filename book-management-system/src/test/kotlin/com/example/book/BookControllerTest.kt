@@ -16,7 +16,7 @@
 package com.example.book
 
 import com.example.IntegrationBehaviorSpec
-import com.example.book.ids.IdGen
+import com.example.ids.IdGen
 import com.example.json.BookJson
 import com.example.sql
 import io.kotlintest.shouldBe

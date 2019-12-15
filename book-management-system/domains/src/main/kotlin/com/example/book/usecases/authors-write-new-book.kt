@@ -15,15 +15,15 @@
  */
 package com.example.book.usecases
 
-import com.example.book.Cause
-import com.example.book.Reason
-import com.example.book.ResultEx
+import com.example.util.Cause
+import com.example.util.Reason
+import com.example.util.ResultEx
 import com.example.book.domains.Manuscript
 import com.example.book.domains.PublishedBook
-import com.example.book.ids.AuthorId
+import com.example.book.authors.AuthorId
 import com.example.book.repository.AuthorFinder
 
-import com.example.book.ResultEx.Companion.asResult
+import com.example.util.ResultEx.Companion.asResult
 import com.example.book.annotations.UseCase
 import com.example.book.domains.Writers
 import com.example.book.repository.BookWriteRepository

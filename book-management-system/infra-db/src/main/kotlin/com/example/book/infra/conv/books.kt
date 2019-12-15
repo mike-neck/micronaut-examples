@@ -15,10 +15,10 @@
  */
 package com.example.book.infra.conv
 
-import com.example.book.attributes.BookName
-import com.example.book.attributes.Price
-import com.example.book.attributes.PublicationDate
-import com.example.book.ids.BookId
+import com.example.attributes.BookName
+import com.example.attributes.Price
+import com.example.attributes.PublicationDate
+import com.example.book.books.BookId
 import org.seasar.doma.ExternalDomain
 import org.seasar.doma.jdbc.domain.DomainConverter
 import java.util.*

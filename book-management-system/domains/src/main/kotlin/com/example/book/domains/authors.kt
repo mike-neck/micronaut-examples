@@ -15,9 +15,9 @@
  */
 package com.example.book.domains
 
-import com.example.book.attributes.AuthorFirstName
-import com.example.book.attributes.AuthorLastName
-import com.example.book.ids.AuthorId
+import com.example.attributes.AuthorFirstName
+import com.example.attributes.AuthorLastName
+import com.example.book.authors.AuthorId
 import org.jetbrains.annotations.TestOnly
 
 data class AuthorName(val firstName: AuthorFirstName, val lastName: AuthorLastName) {

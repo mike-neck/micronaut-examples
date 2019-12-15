@@ -15,14 +15,14 @@
  */
 package com.example.book.usecases
 
-import com.example.book.Failure
-import com.example.book.Success
-import com.example.book.attributes.BookName
-import com.example.book.attributes.Price
-import com.example.book.attributes.PublicationDate
+import com.example.util.Failure
+import com.example.util.Success
+import com.example.attributes.BookName
+import com.example.attributes.Price
+import com.example.attributes.PublicationDate
 import com.example.book.domains.*
-import com.example.book.ids.AuthorId
-import com.example.book.ids.BookId
+import com.example.book.authors.AuthorId
+import com.example.book.books.BookId
 import com.example.book.repository.AuthorFinder
 import com.example.book.repository.BookWriteRepository
 import io.kotlintest.be

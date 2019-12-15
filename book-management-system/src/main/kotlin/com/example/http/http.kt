@@ -15,9 +15,9 @@
  */
 package com.example.http
 
-import com.example.book.Cause
-import com.example.book.Reason
-import com.example.book.ResultEx
+import com.example.util.Cause
+import com.example.util.Reason
+import com.example.util.ResultEx
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 
@@ -25,7 +25,8 @@ typealias ValidationError = List<String>
 
 fun ValidationError.toHttpError(): HttpError = HttpStatus.BAD_REQUEST to this
 
-val <T: Any> ResultEx<ValidationError, T>.validationErrorToHttpError: ResultEx<HttpError, T> get() =
+val <T: Any> ResultEx<ValidationError, T>.validationErrorToHttpError: ResultEx<HttpError, T>
+  get() =
     this.mapFailure { it.toHttpError() }
 
 fun Reason.toHttpError(): HttpError =

@@ -17,7 +17,7 @@ package com.example.book.infra.repositories
 
 import com.example.book.domains.Author
 import com.example.book.domains.AuthorName
-import com.example.book.ids.AuthorId
+import com.example.book.authors.AuthorId
 import com.example.book.infra.dao.AuthorDao
 import com.example.book.repository.AuthorFinder
 import javax.inject.Inject

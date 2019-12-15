@@ -15,12 +15,12 @@
  */
 package com.example.json
 
-import com.example.book.attributes.*
+import com.example.attributes.*
 import com.example.book.domains.Author
 import com.example.book.domains.AuthorName
 import com.example.book.domains.PublishedBook
-import com.example.book.ids.AuthorId
-import com.example.book.ids.BookId
+import com.example.book.authors.AuthorId
+import com.example.book.books.BookId
 import com.example.book.infra.entities.AuthorRecord
 import java.time.format.DateTimeFormatter
 

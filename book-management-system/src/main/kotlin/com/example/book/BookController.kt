@@ -16,11 +16,11 @@
 package com.example.book
 
 import com.example.Logger
-import com.example.book.attributes.BookName
-import com.example.book.attributes.Price
-import com.example.book.attributes.PublicationDate
+import com.example.attributes.BookName
+import com.example.attributes.Price
+import com.example.attributes.PublicationDate
 import com.example.book.domains.BookUpdate
-import com.example.book.ids.BookId
+import com.example.book.books.BookId
 import com.example.book.usecases.DeleteBook
 import com.example.book.usecases.FindBooks
 import com.example.book.usecases.UpdateBookAttributes
@@ -28,6 +28,8 @@ import com.example.http.nullToHttpError
 import com.example.http.toHttpError
 import com.example.http.toResponse
 import com.example.json.BookJson
+import com.example.util.Reason
+import com.example.util.ResultEx
 import com.example.util.nullToValidationError
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus

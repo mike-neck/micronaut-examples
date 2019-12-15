@@ -15,7 +15,7 @@
  */
 package com.example.book.infra.util
 
-import com.example.book.ResultEx
+import com.example.util.ResultEx
 import org.seasar.doma.jdbc.Result
 
 fun <F: Any, S: Any> Result<S>.or(f: F): ResultEx<F, S> =

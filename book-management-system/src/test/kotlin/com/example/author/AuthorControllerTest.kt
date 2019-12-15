@@ -17,7 +17,7 @@ package com.example.author
 
 import com.example.DbCleaner
 import com.example.IntegrationBehaviorSpec
-import com.example.book.ids.IdGen
+import com.example.ids.IdGen
 import com.example.json.AuthorJson
 import com.example.json.BookJson
 import com.example.sql

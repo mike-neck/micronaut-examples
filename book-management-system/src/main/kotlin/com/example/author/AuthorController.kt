@@ -16,12 +16,12 @@
 package com.example.author
 
 import com.example.Logger
-import com.example.book.ResultEx
-import com.example.book.attributes.*
+import com.example.util.ResultEx
+import com.example.attributes.*
 import com.example.book.domains.AuthorName
 import com.example.book.domains.Manuscript
-import com.example.book.ids.AuthorId
-import com.example.book.ids.BookId
+import com.example.book.authors.AuthorId
+import com.example.book.books.BookId
 import com.example.book.usecases.AuthorsWritingNewBook
 import com.example.book.usecases.CreateNewAuthor
 import com.example.book.usecases.FindAuthors

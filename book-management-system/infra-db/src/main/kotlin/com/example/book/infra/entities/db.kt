@@ -15,14 +15,14 @@
  */
 package com.example.book.infra.entities
 
-import com.example.book.Change
-import com.example.book.attributes.*
+import com.example.util.Change
+import com.example.attributes.*
 import com.example.book.domains.BookChange
 import com.example.book.domains.Work
-import com.example.book.ids.AuthorId
-import com.example.book.ids.BookId
-import com.example.book.ids.BookId.Companion.newBookId
-import com.example.book.ids.IdGen
+import com.example.book.authors.AuthorId
+import com.example.book.books.BookId
+import com.example.book.books.BookId.Companion.newBookId
+import com.example.ids.IdGen
 import org.jetbrains.annotations.TestOnly
 import org.seasar.doma.Entity
 import org.seasar.doma.Id

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.book.attributes
+package com.example.attributes
 
 import java.lang.NumberFormatException
 import java.time.DateTimeException

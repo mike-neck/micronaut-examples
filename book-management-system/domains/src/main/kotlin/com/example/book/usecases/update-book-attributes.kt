@@ -15,16 +15,16 @@
  */
 package com.example.book.usecases
 
-import com.example.book.Cause
-import com.example.book.Reason
-import com.example.book.ResultEx
+import com.example.util.Cause
+import com.example.util.Reason
+import com.example.util.ResultEx
 import com.example.book.domains.BookUpdate
 import com.example.book.domains.PublishedBook
-import com.example.book.ids.BookId
+import com.example.book.books.BookId
 import com.example.book.repository.BookFinder
 import com.example.book.repository.BookWriteRepository
 
-import com.example.book.ResultEx.Companion.asResult
+import com.example.util.ResultEx.Companion.asResult
 import com.example.book.domains.BookChange
 import javax.inject.Inject
 import javax.inject.Named

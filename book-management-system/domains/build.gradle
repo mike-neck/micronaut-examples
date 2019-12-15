@@ -50,4 +50,5 @@ allOpen {
 
 jig {
     jigJar(project.rootProject.file("jig/jig-cli-kt.jar"))
+    jigModelPackagePattern(/*language=regex*/".+\\\\.(ids|books|authors|domains|usecases|repository)\\\\..+")
 }

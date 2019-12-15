@@ -15,8 +15,8 @@
  */
 package com.example.book.infra.dao
 
-import com.example.book.ids.AuthorId
-import com.example.book.ids.BookId
+import com.example.book.authors.AuthorId
+import com.example.book.books.BookId
 import com.example.book.infra.Db
 import com.example.book.infra.DbExtension
 import com.example.book.infra.entities.WritingRecord

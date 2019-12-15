@@ -17,7 +17,7 @@ package com.example.book.usecases
 
 import com.example.book.annotations.UseCase
 import com.example.book.domains.Author
-import com.example.book.ids.AuthorId
+import com.example.book.authors.AuthorId
 import com.example.book.repository.AuthorFinder
 import javax.inject.Inject
 import javax.inject.Named

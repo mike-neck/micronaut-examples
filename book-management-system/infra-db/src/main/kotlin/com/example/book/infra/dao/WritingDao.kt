@@ -19,8 +19,8 @@ import com.example.book.domains.Author
 import com.example.book.domains.AuthorName
 import com.example.book.domains.Authors
 import com.example.book.domains.PublishedBook
-import com.example.book.ids.AuthorId
-import com.example.book.ids.BookId
+import com.example.book.authors.AuthorId
+import com.example.book.books.BookId
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.BookAggregate
 import com.example.book.infra.entities.WritingRecord

@@ -15,13 +15,12 @@
  */
 package com.example.book.infra.dao
 
-import com.example.book.Cause
-import com.example.book.Change
-import com.example.book.Reason
-import com.example.book.ResultEx
-import com.example.book.ResultEx.Companion.asResult
+import com.example.util.Cause
+import com.example.util.Reason
+import com.example.util.ResultEx
+import com.example.util.ResultEx.Companion.asResult
 import com.example.book.domains.*
-import com.example.book.ids.BookId
+import com.example.book.books.BookId
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.BookAggregate
 import com.example.book.infra.entities.BookRecord

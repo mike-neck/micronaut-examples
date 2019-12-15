@@ -15,7 +15,7 @@
  */
 package com.example
 
-import com.example.book.ids.IdGen
+import com.example.ids.IdGen
 import com.example.util.DomaLogger
 import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory

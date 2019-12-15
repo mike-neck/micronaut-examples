@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.book.ids
+package com.example.ids
 
 import java.lang.NumberFormatException
 
@@ -43,26 +43,8 @@ interface StrictId<T: Id<V>, V> {
       else value.value
 }
 
-private fun String?.toLongOrNull(): Long? = try {
+fun String?.toLongOrNull(): Long? = try {
   this?.toLong()
 } catch (e: NumberFormatException) {
   null
-}
-
-data class BookId(override val value: Long): Id<Long> {
-  companion object : StrictId<BookId, Long> {
-    override fun from(value: Long): BookId = BookId(value)
-    override fun stringToValue(value: String?): Long? = value.toLongOrNull()
-    override val nameOfId: String = "bookId"
-    fun IdGen.newBookId(): BookId = BookId(this.newLongId())
-  }
-}
-
-data class AuthorId(override val value: Long): Id<Long> {
-  companion object: StrictId<AuthorId, Long> {
-    override fun from(value: Long): AuthorId = AuthorId(value)
-    override fun stringToValue(value: String?): Long? = value.toLongOrNull()
-    override val nameOfId: String = "authorId"
-    fun IdGen.newAuthorId(): AuthorId = AuthorId(this.newLongId())
-  }
 }

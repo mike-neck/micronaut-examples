@@ -17,8 +17,8 @@ package com.example.book.infra.repositories
 
 import com.example.book.domains.Author
 import com.example.book.domains.AuthorName
-import com.example.book.ids.AuthorId.Companion.newAuthorId
-import com.example.book.ids.IdGen
+import com.example.book.authors.AuthorId.Companion.newAuthorId
+import com.example.ids.IdGen
 import com.example.book.infra.dao.AuthorDao
 import com.example.book.infra.entities.AuthorRecord
 import com.example.book.infra.util.map

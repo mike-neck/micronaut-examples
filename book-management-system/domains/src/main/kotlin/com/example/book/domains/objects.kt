@@ -15,11 +15,11 @@
  */
 package com.example.book.domains
 
-import com.example.book.Change
-import com.example.book.attributes.BookName
-import com.example.book.attributes.Price
-import com.example.book.attributes.PublicationDate
-import com.example.book.ids.BookId
+import com.example.util.Change
+import com.example.attributes.BookName
+import com.example.attributes.Price
+import com.example.attributes.PublicationDate
+import com.example.book.books.BookId
 import org.jetbrains.annotations.TestOnly
 
 data class PublishedBook(

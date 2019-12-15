@@ -15,7 +15,7 @@
  */
 package com.example.book.infra.dao
 
-import com.example.book.ids.AuthorId
+import com.example.book.authors.AuthorId
 import com.example.book.infra.MicronautDomaConfigInjection
 import com.example.book.infra.entities.AuthorRecord
 import org.seasar.doma.Dao
